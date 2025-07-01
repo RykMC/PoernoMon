@@ -115,8 +115,8 @@ export async function equipItem(req, res) {
 
 const genitiveMap = {
   angriff: "des Angriffs",
-  krit_chance: "der kritischen Chance",
-  krit_schaden: "des kritischen Schadens",
+  krit_chance: "der Chance",
+  krit_schaden: "des Schadens",
   doppelschlag: "des Doppelschlags",
   verteidigen: "der Verteidigung",
   ausweichen: "des Ausweichens",
@@ -327,6 +327,57 @@ export const unsellItem = async (req, res) => {
   } catch (err) {
     console.error("Fehler beim Unsell:", err);
     res.status(500).json({ error: "Konnte Item nicht aus dem Shop nehmen" });
+  }
+};
+
+
+
+export const usePotion = async (req, res) => {
+  const itemId = req.params.id;
+  const userId = req.user.userId;
+
+  try {
+    // Trank holen und prüfen, ob er dem Spieler gehört
+    const itemRes = await pool.query(
+      `SELECT * FROM items WHERE id = $1 AND userid = $2 AND typ = 'trank'`,
+      [itemId, userId]
+    );
+
+    if (itemRes.rowCount === 0) {
+      return res.status(404).json({ error: "Trank nicht gefunden oder gehört dir nicht." });
+    }
+
+    // Spieler + Leben holen
+    const spielerRes = await pool.query(
+      `SELECT leben, max_leben 
+       FROM spieler 
+       WHERE user_id = $1`,
+      [userId]
+    );
+
+    if (spielerRes.rowCount === 0) {
+      return res.status(404).json({ error: "Spieler oder Poernomon nicht gefunden." });
+    }
+
+    let { leben, max_leben } = spielerRes.rows[0];
+    let neuesLeben = Math.min(leben + 30, max_leben);
+
+    // Leben updaten
+    await pool.query(
+      `UPDATE spieler 
+       SET leben = $1 
+       WHERE user_id = $2`,
+      [neuesLeben, userId]
+    );
+
+    // Trank aus Inventar löschen
+    await pool.query(`DELETE FROM items WHERE id = $1`, [itemId]);
+
+    res.json({ success: true, message: `Trank benutzt. Leben: ${neuesLeben}/${max_leben}` });
+
+  } catch (err) {
+    console.error("Fehler beim Benutzen des Tranks:", err);
+    res.status(500).json({ error: "Trank konnte nicht benutzt werden" });
   }
 };
 

@@ -1,21 +1,38 @@
 import api from "../api/axios";
+import { useEffect } from "react";
 import ProfilModal from "./ProfilModal";
 import { useGame } from "../context/GameContext";
 
 export default function PoernoMonModal({ setModalContent, setShowModal }) {
-  const { poernomon, items, fetchPoernomon } = useGame();
+  const { poernomon, fetchPoernomon } = useGame();
 
-  const rarityClass = (seltenheit) => {
+  const rarityStyles = (seltenheit) => {
     switch (seltenheit) {
       case 'legendär':
-        return "border-yellow-400 border-double border-7 shadow-yellow-500/50";
+        return {
+          border: "border-yellow-400 border-4",
+          bg: "bg-yellow-400/10",
+          shadow: "shadow-yellow-500/50"
+        };
       case 'selten':
-        return "border-blue-300 border-double border-4 shadow-blue-500/50";
+        return {
+          border: "border-blue-300 border-2",
+          bg: "bg-blue-300/10",
+          shadow: "shadow-blue-500/40"
+        };
       default:
-        return "border-gray-600 border-2";
+        return {
+          border: "border-gray-600",
+          bg: "bg-gray-600/10",
+          shadow: "shadow-gray-500/30"
+        };
     }
   };
 
+
+   useEffect(() => {
+    fetchPoernomon();
+  }, []);
  
   const handleSkill = async (key) => {
     try {
@@ -60,14 +77,14 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
   ];
 
 
-
+  console.log(poernomon);
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 mt-6">
+    <div className="w-full max-w-8xl mx-auto px-4 mt-6">
       <div className=" text-white rounded-2xl shadow-lg p-8 relative">
 
         <h2 className="text-3xl font-bold text-center mb-6">Dein PoernoMon</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="w-[80%] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 mx-auto">
           {/* Linke Seite */}
           <div className="bg-gray-800/50 p-6 rounded-xl">
             <h3 className="text-xl font-semibold mb-2 text-center">{poernomon.name}</h3>
@@ -179,55 +196,62 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
             <h3 className="text-xl font-semibold mb-4 text-center">Ausrüstung</h3>
 
             {/* Dropdowns nebeneinander */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {console.log("Alle Items:", items)}
-              {["waffe","kopfschutz","brustschutz","beinschutz"].map(slot => (
-                <div key={slot}>
-                  <label className="block mb-1 capitalize ">{slot}</label>
-                  <select
-                    className={`w-full bg-gray-700 text-white p-2 rounded`}
-                    onChange={(e) => handleEquip(slot, e.target.value)}
-                    value={
-                      poernomon.items.find(i => i.typ === slot && i.angelegt === 1)?.id || ""
-                    }
-                  >
-                    <option key={0} value="">- auswählen -</option>
-                    {items
-                      .filter(item => item.typ === slot && !item.shop)
-                      .map(item => (
-                        <option key={item.id} value={item.id}>
-                          {item.bezeichnung}
-                        </option>
-                    ))}
-                  </select>
-                </div>
-              ))}
-            </div>
-
-            {/* Ausgewählte Items nebeneinander */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-1 w-190">
               {["waffe", "kopfschutz", "brustschutz", "beinschutz"].map(slot => {
                 const item = poernomon.items.find(i => i.typ === slot && i.angelegt === 1);
+                const style = item ? rarityStyles(item.seltenheit) : {
+                  bg: "bg-gray-700",
+                  border: "border-gray-600",
+                  shadow: "shadow-inner"
+                };
                 return (
-                  <div key={slot} className={`bg-gray-700 rounded-lg p-3 text-center ${item ? rarityClass(item.seltenheit) : ""}`}>
-                    {item ? (
-                      <>
-                      <div className="text-xs text-white">{item.bezeichnung}</div>
-                        <img src={`/${item.bild}`} alt={item.bezeichnung} className="mx-auto w-16 h-16 object-contain mb-2" />
-                        
-                        {item.boni.map((b, idx) => (
-                          <div key={idx} className="text-[10px] text-gray-400">
-                            +{b.wert} {b.was}
+                  <div key={slot} className="flex flex-col items-center gap-2">
+                    {/* Dropdown separat oben */}
+                    <select
+                      className="w-44 bg-gray-800 text-white p-2 rounded text-xs"
+                      onChange={(e) => handleEquip(slot, e.target.value)}
+                      value={item?.id || ""}
+                    >
+                      <option key={0} value="">- {slot} -</option>
+                      {poernomon.items
+                        .filter(it => it.typ === slot && !it.shop)
+                        .map(it => (
+                          <option key={it.id} value={it.id}>
+                            {it.bezeichnung}
+                          </option>
+                      ))}
+                    </select>
+
+                    {/* Die Card darunter */}
+                    <div
+                      className={`w-40 md:w-46 h-52 md:h-56 rounded-2xl p-5 text-center transform transition hover:scale-105
+                                  ${style.bg} ${style.border} shadow-xl ${style.shadow}`}
+                    >
+                      {item ? (
+                        <>
+                          <div className="mb-2 font-semibold text-white">{item.bezeichnung}</div>
+                          <img
+                            src={`/${item.bild}`}
+                            alt={item.bezeichnung}
+                            className="w-20 h-20 object-contain mx-auto mb-4"
+                          />
+                          <div className="text-xs space-y-1 mb-2 text-gray-300">
+                            {item.boni.map((b, idx) => (
+                              <div key={idx}>+{b.wert} {b.was}</div>
+                            ))}
                           </div>
-                        ))}
-                      </>
-                    ) : (
-                      <div className="text-xs italic text-gray-400">leer</div>
-                    )}
+                        </>
+                      ) : (
+                        <div className="text-xs italic text-gray-400 mt-8">leer</div>
+                      )}
+                    </div>
+
                   </div>
                 );
               })}
             </div>
+
+
           </div>
 
 

@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import api from "../api/axios";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useGame } from "../context/GameContext";
 
 export default function Kampfseite() {
   const { kampfId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { fetchSpieler } = useGame();
 
   const [kampfverlauf, setKampfverlauf] = useState([]);
   const [index, setIndex] = useState(0);
@@ -215,7 +217,7 @@ export default function Kampfseite() {
               <p>🌀 Kampfstaub: {belohnungV.staub}</p>
               <p>💰 Coins: {belohnungV.coins}</p>
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() => {fetchSpieler(); navigate("/dashboard"); }}
                 className="mt-4 px-4 py-2 bg-yellow-500 text-black font-bold rounded hover:bg-yellow-400"
               >
                 Zurück zum Dashboard

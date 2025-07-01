@@ -21,7 +21,7 @@ export const getPoernomon = async (req, res) => {
 
     // Items für Auswahl
     const itemsRes = await pool.query(
-      "SELECT * FROM items WHERE userid = $1 ORDER BY datum DESC",
+      "SELECT * FROM items WHERE userid = $1 AND im_shop = 0 ORDER BY datum DESC",
       [userId]
     );
 

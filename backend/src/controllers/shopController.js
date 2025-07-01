@@ -2,8 +2,17 @@ import pool from '../db/db.js';
 
 export const getShopItems = async (req, res) => {
   const userId = req.user.userId;
-console.log("Userid: ", userId);
+  console.log("Userid: ", userId);
+
   try {
+    // Spielerlevel holen
+    const playerRes = await pool.query(`SELECT level FROM spieler WHERE user_id = $1`, [userId]);
+    if (playerRes.rowCount === 0) {
+      return res.status(404).json({ error: "Spieler nicht gefunden" });
+    }
+    const playerLevel = playerRes.rows[0].level;
+
+    // Shopitems laden, die <= Level sind
     const shopRes = await pool.query(`
       SELECT 
         s.id AS shop_id,
@@ -20,13 +29,15 @@ console.log("Userid: ", userId);
         i.bonus3wert,
         i.seltenheit,
         i.typ,
+        i.level AS item_level,
         u.username AS verkäufer
       FROM shop s
       JOIN items i ON s.item_id = i.id
       LEFT JOIN spieler u ON s.user_id = u.user_id
       WHERE s.user_id != $1
+      AND i.level <= $2
       ORDER BY s.datum DESC
-    `, [userId]);
+    `, [userId, playerLevel]);
 
     res.json(shopRes.rows);
   } catch (err) {
@@ -61,6 +72,31 @@ export const buyShopItem = async (req, res) => {
       return res.status(400).json({ error: "Kannst dein eigenes Item nicht kaufen" });
     }
 
+    // Prüfen ob Käufer genug Coins hat
+    const buyerRes = await pool.query(`SELECT coins FROM spieler WHERE user_id = $1`, [buyerId]);
+    const buyer = buyerRes.rows[0];
+
+    if (!buyer || buyer.coins < shopItem.preis) {
+      return res.status(400).json({ error: "Du hast nicht genug Coins, um dieses Item zu kaufen." });
+    }
+
+    if (shopItem.item_id === 0) {
+      await pool.query(`UPDATE spieler SET coins = coins - $1 WHERE user_id = $2`, [shopItem.preis, buyerId]);
+
+      const datum = Math.floor(Date.now() / 1000);
+      await pool.query(`
+        INSERT INTO items 
+        (userid, typ, bonus1was, bonus1wert, bezeichnung, bild, datum, im_shop, angelegt, seltenheit)
+        VALUES 
+        ($1, 'trank', 'leben', 30, 'kleiner Heiltrank', 'images/items/trank.png', $2, 0, 0, 'normal')
+      `, [
+        buyerId,
+        datum
+      ]);
+
+      return res.json({ success: true, message: "Heiltrank erfolgreich gekauft" });
+    }
+
     // Item dem Käufer übertragen
     await pool.query(`
       UPDATE items 
@@ -82,9 +118,9 @@ export const buyShopItem = async (req, res) => {
       `Dein Item (${shopItem.typ}) wurde für ${shopItem.preis} Coins gekauft.`
     ]);
 
-    // Coins-Transaktion (optional)
-    await pool.query(`UPDATE spieler SET coins = coins - $1, items_gekauft = items_gekauft +1, coins_ausgegeben = coins_ausgegeben + $2 WHERE user_id = $3`, [shopItem.preis, shopItem.preis, buyerId]);
-    await pool.query(`UPDATE spieler SET coins = coins + $1, items_verkauft = items_verkauft +1, gesamt_coins_verdient = gesamt_coins_verdient + $2 WHERE user_id = $3`, [shopItem.preis, shopItem.preis, shopItem.seller_id]);
+    // Coins-Transaktionen
+    await pool.query(`UPDATE spieler SET coins = coins - $1, items_gekauft = items_gekauft + 1, coins_ausgegeben = coins_ausgegeben + $1 WHERE user_id = $2`, [shopItem.preis, buyerId]);
+    await pool.query(`UPDATE spieler SET coins = coins + $1, items_verkauft = items_verkauft + 1, gesamt_coins_verdient = gesamt_coins_verdient + $1 WHERE user_id = $2`, [shopItem.preis, shopItem.seller_id]);
 
     res.json({ success: true, message: "Item erfolgreich gekauft" });
 
