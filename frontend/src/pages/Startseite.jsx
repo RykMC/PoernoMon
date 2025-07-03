@@ -1,40 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { useNavigate } from "react-router-dom";
-
 
 export default function Startseite() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [mode, setMode] = useState("login");
+  const [currentMon, setCurrentMon] = useState({ name: "", bild: "" });
+  const [fade, setFade] = useState(true);
 
-  const handleLogin = async (e) => {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(async () => {
+        try {
+          const res = await api.get("/auth/random");
+          setCurrentMon({ 
+            name: res.data.username, 
+            bild: "/" + res.data.kreatur_bild 
+          });
+          setFade(true);
+        } catch (err) {
+          console.error("Fehler beim Laden des PoernoMons:", err);
+        }
+      }, 2000);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAuth = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await api.post("/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      await new Promise(resolve => setTimeout(resolve, 50));
-      navigate("/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.error || "Login fehlgeschlagen");
-    }
-  };
-
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-
-    try {
-        const res = await api.post("/auth/register", {
-        email,
-        password,
-        });
-
+      if (mode === "login") {
+        const res = await api.post("/auth/login", { email, password });
+        localStorage.setItem("token", res.data.token);
+        window.location.href = "/dashboard";
+      } else {
+        const res = await api.post("/auth/register", { email, password });
         localStorage.setItem("token", res.data.token);
         alert("Registrierung erfolgreich!");
+      }
     } catch (err) {
-        alert(err.response?.data?.error || "Registrierung fehlgeschlagen");
+      alert(err.response?.data?.error || "Fehler beim Auth");
     }
   };
 
@@ -43,9 +49,25 @@ export default function Startseite() {
       className="min-h-screen bg-cover bg-center flex flex-col justify-between"
       style={{ backgroundImage: "url('/images/global/bg.png')" }}
     >
-      {/* Header mit Login */}
-      <header className="p-6 flex justify-end gap-4 bg-black/60">
-        <form onSubmit={handleLogin} className="flex gap-2 items-center">
+      {/* Header mit Umschalter */}
+      <header className="p-6 flex justify-between bg-black/60 items-center">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setMode("login")}
+            className={`${mode === "login" ? "bg-yellow-400" : "bg-gray-400/40"} px-4 py-1 rounded`}
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => setMode("register")}
+            className={`${mode === "register" ? "bg-yellow-400" : "bg-gray-400/40"} px-4 py-1 rounded`}
+          >
+            Register
+          </button>
+        </div>
+
+        {/* Auth Form */}
+        <form onSubmit={handleAuth} className="flex gap-2 items-center">
           <input
             type="email"
             placeholder="E-Mail"
@@ -64,42 +86,25 @@ export default function Startseite() {
             type="submit"
             className="px-4 py-1 bg-yellow-400 rounded hover:bg-yellow-300"
           >
-            Login
+            {mode === "login" ? "Login" : "Registrieren"}
           </button>
         </form>
       </header>
 
-      {/* Mitte: Registrierung */}
-      <main className="flex justify-center items-center flex-grow">
-        
-        <form
-          onSubmit={handleRegister}
-          className="bg-black/70 text-white p-6 rounded-lg backdrop-blur-md"
-        >
-          <h2 className="text-2xl mb-4 font-bold text-center">Registrieren</h2>
- 
-          <input
-            type="email"
-            placeholder="E-Mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="block w-full mb-2 px-3 py-2 rounded"
+      {/* Mitte mit PoernoMon */}
+      <main className="flex justify-center items-center flex-grow relative mt-60 mr-20">
+        <div className={`relative transition-opacity duration-2000 ${fade ? "opacity-100" : "opacity-0"}`}>
+          <img
+            src={currentMon.bild}
+            alt={currentMon.name}
+            className="w-[500px] mx-auto"
           />
-          <input
-            type="password"
-            placeholder="Passwort"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="block w-full mb-4 px-3 py-2 rounded"
-          />
-          <button
-            type="submit"
-            className="w-full bg-green-500 hover:bg-green-400 text-white py-2 rounded"
-          >
-            Registrieren
-          </button>
-        </form>
+          <div className="absolute bottom-48 left-38 w-50 bg-black/60 py-2 text-center">
+            <h2 className="text-2xl text-white font-bold">{currentMon.name}</h2>
+          </div>
+        </div>
       </main>
+
 
       <footer className="text-white text-center p-4 bg-black/60 text-sm">
         © 2025 PoernoMons

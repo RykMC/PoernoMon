@@ -1,8 +1,8 @@
 import pool from '../db/db.js';
+import { checkErfolgeNachKauf } from "../utils/erfolge.js";
 
 export const getShopItems = async (req, res) => {
   const userId = req.user.userId;
-  console.log("Userid: ", userId);
 
   try {
     // Spielerlevel holen
@@ -57,8 +57,8 @@ export const buyShopItem = async (req, res) => {
     const shopRes = await pool.query(`
       SELECT s.*, i.userid AS seller_id, i.id AS item_id, i.im_shop, i.angelegt, i.typ, u.username AS seller_name
       FROM shop s
-      JOIN items i ON s.item_id = i.id
-      JOIN spieler u ON s.user_id = u.user_id
+      LEFT JOIN items i ON s.item_id = i.id
+      LEFT JOIN spieler u ON s.user_id = u.user_id
       WHERE s.id = $1
     `, [shopId]);
 
@@ -67,7 +67,6 @@ export const buyShopItem = async (req, res) => {
     }
 
     const shopItem = shopRes.rows[0];
-
     if (shopItem.seller_id == buyerId) {
       return res.status(400).json({ error: "Kannst dein eigenes Item nicht kaufen" });
     }
@@ -107,21 +106,24 @@ export const buyShopItem = async (req, res) => {
     // Shop-Eintrag löschen
     await pool.query(`DELETE FROM shop WHERE id = $1`, [shopId]);
 
+    const datum = Math.floor(Date.now() / 1000)
     // Nachricht an den Verkäufer
     await pool.query(`
       INSERT INTO nachrichten (von_id, an_id, betreff, text, datum, gelesen)
-      VALUES ($1, $2, $3, $4, extract(epoch from now())::int, false)
+      VALUES ($1, $2, $3, $4, $5, false)
     `, [
       buyerId, 
       shopItem.seller_id,
       "Dein Item wurde verkauft!",
-      `Dein Item (${shopItem.typ}) wurde für ${shopItem.preis} Coins gekauft.`
+      `Dein Item (${shopItem.typ}) wurde für ${shopItem.preis} Coins gekauft.`,
+      datum
     ]);
 
     // Coins-Transaktionen
     await pool.query(`UPDATE spieler SET coins = coins - $1, items_gekauft = items_gekauft + 1, coins_ausgegeben = coins_ausgegeben + $1 WHERE user_id = $2`, [shopItem.preis, buyerId]);
     await pool.query(`UPDATE spieler SET coins = coins + $1, items_verkauft = items_verkauft + 1, gesamt_coins_verdient = gesamt_coins_verdient + $1 WHERE user_id = $2`, [shopItem.preis, shopItem.seller_id]);
 
+    await checkErfolgeNachKauf(buyerId);
     res.json({ success: true, message: "Item erfolgreich gekauft" });
 
   } catch (err) {

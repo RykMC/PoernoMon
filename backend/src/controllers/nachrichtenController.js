@@ -25,7 +25,7 @@ export async function getAlleNachrichten(req, res) {
     const userId = req.user.userId;
 
     const result = await pool.query(`
-      SELECT id, betreff, gelesen, datum
+      SELECT id, betreff, gelesen, datum, text
       FROM nachrichten
       WHERE an_id = $1
       ORDER BY datum DESC

@@ -44,7 +44,7 @@ export const register = async (req, res) => {
         user_id, username, background_id, frame_id,
         skillpunkte, leben, coins, kampfstaub, max_leben, kreatur_bild
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [userId, "", 0, 0, 10, 30, 50, 500, 30, creatureBild]
+      [userId, "", 0, 0, 10, 30, 1000, 500, 30, creatureBild]
     );
 
     res.json({ success: true });
@@ -121,5 +121,27 @@ export const setUsername = async (req, res) => {
   } catch (err) {
     console.error("Fehler beim Setzen des Namens:", err);
     res.status(500).json({ error: "Fehler beim Speichern" });
+  }
+};
+
+
+
+export const getRandomPoernomon = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT username, kreatur_bild 
+      FROM spieler 
+      WHERE user_id != 0
+      ORDER BY RANDOM()
+      LIMIT 1
+    `);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Keine PoernoMons gefunden." });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Fehler beim Laden eines zufälligen PoernoMons:", err);
+    res.status(500).json({ error: "Serverfehler beim Laden." });
   }
 };

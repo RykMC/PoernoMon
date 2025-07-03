@@ -1,4 +1,5 @@
 import pool from "../db/db.js";
+import { checkErfolgeNachCraft } from "../utils/erfolge.js";
 
 export async function getItems(req, res) {
   try {
@@ -217,6 +218,7 @@ export async function craftItem(req, res) {
       seltenheit
     ]);
 
+    await checkErfolgeNachCraft(userId);
     res.json({ success: true, message: `Du hast ein ${seltenheit}es Item gecraftet!` });
   } catch (err) {
     console.error("Fehler beim Craften:", err);

@@ -25,7 +25,6 @@ export const matchmaking = async (req, res) => {
 
     // 3. Kampf starten + speichern
     const result  = await simulateFight (player, gegner);
-    console.log("Ergebnis:", result);
     res.json(result);
   } catch (err) {
     console.error("Fehler beim Matchmaking:", err);

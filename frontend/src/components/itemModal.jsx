@@ -15,13 +15,14 @@ export default function AusrüstungsModal({ onClose }) {
   const [selectedUnsellItemId, setSelectedUnsellItemId] = useState(null);
   const [showUsePotionModal, setShowUsePotionModal] = useState(false);
   const [selectedPotionId, setSelectedPotionId] = useState(null);
-  const { fetchSpieler, fetchPoernomon, fetchItems, spieler, items } = useGame();
+  const { fetchSpieler, fetchPoernomon, fetchItems, fetchNachrichten, spieler, items } = useGame();
 
 
 
   useEffect(() => {
     loadData();
     fetchSpieler();
+    fetchItems();
   }, []);
 
   const loadData = async () => {
@@ -57,9 +58,9 @@ const handleUsePotionConfirm = async () => {
       setCrafting(true);
       await api.post("/items/craft");
       await loadData();
-      await fetchSpieler();
       await fetchPoernomon();
       await fetchItems();
+      await fetchSpieler();
     } catch (err) {
       alert("Fehler beim Craften: ", err);
     } finally {
@@ -120,28 +121,29 @@ const handleUsePotionConfirm = async () => {
     }
   };
 
-  const rarityStyles = (seltenheit) => {
+ const rarityStyles = (seltenheit) => {
     switch (seltenheit) {
       case 'legendär':
         return {
           border: "border-yellow-400 border-4",
-          bg: "bg-yellow-400/10",
+          bg: "bg-yellow-400/50",
           shadow: "shadow-yellow-500/50"
         };
       case 'selten':
         return {
           border: "border-blue-300 border-2",
-          bg: "bg-blue-300/10",
+          bg: "bg-blue-300/50",
           shadow: "shadow-blue-500/40"
         };
+        
       default:
         return {
           border: "border-gray-600",
-          bg: "bg-gray-600/10",
+          bg: "bg-gray-600/50",
           shadow: "shadow-gray-500/30"
         };
     }
-  }
+  };
 
   return (
     <div>
@@ -170,15 +172,15 @@ const handleUsePotionConfirm = async () => {
       {loading ? (
         <Loader />
       ) : (
- <div className="grid grid-cols-2 md:grid-cols-4 gap-6 h-120 overflow-y-auto">
+ <div className="grid grid-cols-2 md:grid-cols-4 gap-6 h-120">
   {items.map((item) => {
     const style = rarityStyles(item.seltenheit);
     return (
       <div key={item.id} className="flex flex-col items-center">
-        <div
-          className={`relative w-40 md:w-46 h-52 md:h-56 rounded-2xl p-5 text-center transform transition hover:scale-105
-                      flex flex-col items-center justify-between
-                      ${style.bg} ${style.border} shadow-xl ${style.shadow}`}
+       <div
+          className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center transform transition hover:scale-105
+            shadow-xl ${item ? `${style.bg} ${style.border} ${style.shadow}` : ""}`
+          }
         >
           <div className="relative w-full flex flex-col items-center text-center">
             {(item.angelegt == 1 || item.angelegt === "1") && (
@@ -205,7 +207,8 @@ const handleUsePotionConfirm = async () => {
             {item.bonus2was && <div>+{item.bonus2wert} {item.bonus2was}</div>}
             {item.bonus3was && <div>+{item.bonus3wert} {item.bonus3was}</div>}
           </div>
-
+            </div>
+            <div className="m-2">
           {item.im_shop == 1 || item.im_shop === "1" ? (
             <div className="flex flex-wrap gap-2 mt-auto">
               <button 
@@ -242,6 +245,7 @@ const handleUsePotionConfirm = async () => {
           )}
 
                   </div>
+                  
                 </div>
               );
             })}
@@ -252,8 +256,9 @@ const handleUsePotionConfirm = async () => {
       </div>
       <div className="text-center mt-6">
         <button
-          onClick={() => {
-            fetchItems();
+          onClick={async () => {
+            await fetchItems();
+            await fetchSpieler();
             onClose();
           }}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"

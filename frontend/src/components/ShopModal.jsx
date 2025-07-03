@@ -3,13 +3,13 @@ import api from "../api/axios";
 import Loader from "./Loader";
 import { useGame } from "../context/GameContext";
 
-export default function ShopModal({ onClose, fetchSpieler })  {
+export default function ShopModal({ onClose  })  {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [selectedBuyShopId, setSelectedBuyShopId] = useState(null);
   const [filter, setFilter] = useState("Alle");
-  const { fetchItems } = useGame();
+  const { fetchItems, fetchNachrichten, fetchSpieler, fetchPoernomon } = useGame();
 
   useEffect(() => {
     loadData();
@@ -21,7 +21,6 @@ export default function ShopModal({ onClose, fetchSpieler })  {
       setLoading(true);
       const res = await api.get("/shop");
       setItems(res.data);
-      console.log(res.data);
     } catch (err) {
       console.error("Fehler beim Laden des Shops:", err);
     } finally {
@@ -40,34 +39,41 @@ export default function ShopModal({ onClose, fetchSpieler })  {
         setShowBuyModal(false);
         await loadData();
         await fetchSpieler();
+        await fetchNachrichten();
+        await fetchItems();
+        await fetchPoernomon();
     } catch (err) {
         console.error("Fehler beim Kaufen:", err);
     }
     };
 
 
-  const rarityStyles = (seltenheit) => {
+    const rarityStyles = (seltenheit) => {
     switch (seltenheit) {
       case 'legendär':
         return {
           border: "border-yellow-400 border-4",
-          bg: "bg-yellow-400/10",
+          bg: "bg-yellow-400/50",
           shadow: "shadow-yellow-500/50"
         };
       case 'selten':
         return {
           border: "border-blue-300 border-2",
-          bg: "bg-blue-300/10",
+          bg: "bg-blue-300/50",
           shadow: "shadow-blue-500/40"
         };
+        
       default:
         return {
           border: "border-gray-600",
-          bg: "bg-gray-600/10",
+          bg: "bg-gray-600/50",
           shadow: "shadow-gray-500/30"
         };
     }
   };
+
+
+
   const filteredItems = filter === "Alle"
     ? items
     : items.filter(item => item.typ === filter);
@@ -97,10 +103,10 @@ export default function ShopModal({ onClose, fetchSpieler })  {
               return (
                 <div key={item.shop_id} className="flex flex-col items-center">
                   <div
-                    className={`relative w-40 md:w-46 h-52 md:h-56 rounded-2xl p-5 text-center transform transition hover:scale-105
-                                flex flex-col items-center justify-between
-                                ${style.bg} ${style.border} shadow-xl ${style.shadow}`}
-                  >
+                      className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center transform transition hover:scale-105
+                        shadow-xl ${item ? `${style.bg} ${style.border} ${style.shadow}` : ""}`
+                      }
+                    >
                     <div className="mb-2 font-semibold text-white">{item.bezeichnung}</div>
                     <img
                       src={`/${item.bild}`}
@@ -127,8 +133,9 @@ export default function ShopModal({ onClose, fetchSpieler })  {
 
           <div className="col-span-2 md:col-span-4 text-center mt-6">
             <button
-              onClick={() => {
-                fetchItems();
+              onClick={async () => {
+                await fetchItems();
+                await fetchSpieler();
                 onClose();
               }}
               className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"

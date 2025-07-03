@@ -92,8 +92,10 @@ if (!spieler) return <p className="text-white ">Lade Spielerdaten...</p>;
 
       {/* Auswahl */}
       <div className="mb-4">
+        <div className="flex flex-wrap gap-2 justify-center">
         <h3 className="font-bold mb-2">🖼 Hintergrund wählen</h3>
-        <div className="flex gap-2 overflow-x-auto">
+        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
           {backgrounds.map(bg => (
             <img
               key={bg.id}
@@ -106,11 +108,15 @@ if (!spieler) return <p className="text-white ">Lade Spielerdaten...</p>;
             />
           ))}
         </div>
+
       </div>
 
       <div className="mb-6">
-        <h3 className="font-bold mb-2">🧱 Rahmen wählen</h3>
-        <div className="flex gap-2 overflow-x-auto">
+         <div className="flex flex-wrap gap-2 justify-center">
+         <h3 className="font-bold mb-2">🧱 Rahmen wählen</h3>
+        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
+          
           {frames.map(frame => (
             <img
               key={frame.id}

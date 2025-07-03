@@ -1,6 +1,6 @@
 // Kampflogik zwischen zwei Spielern
 import pool from "../db/db.js";
-
+import { checkErfolgeNachKampf } from "../utils/erfolge.js";
 
 export async function simulateFight(spieler1, spieler2) {
   let runde = 1;
@@ -28,6 +28,7 @@ export async function simulateFight(spieler1, spieler2) {
       gesamt_coins_verdient: 0,
       höchste_xp_in_einem_kampf: 0,
       höchster_gewinn_in_coins: 0,
+      doppelschlag_gemacht: 0,
       kaempfe_insgesamt: 1
     },
     [s2.user_id]: {
@@ -49,6 +50,7 @@ export async function simulateFight(spieler1, spieler2) {
       gesamt_coins_verdient: 0,
       höchste_xp_in_einem_kampf: 0,
       höchster_gewinn_in_coins: 0,
+      doppelschlag_gemacht: 0,
       kaempfe_insgesamt: 1
     }
   };
@@ -378,6 +380,7 @@ export async function simulateFight(spieler1, spieler2) {
     if (s1.doppelschlag > 0) {
       const zufall = Math.floor(Math.random() * 200) + 1;
       if ((s1.doppelschlag - s1.glueck) < zufall) {
+        stats[s1.user_id].doppelschlag_gemacht++;
         await protokolliere("doppelschlag", 0, randomText("doppelschlag", s1.username), s1.user_id, s2.user_id);
         await angriff(s1, s2);
         if (s2.leben <= 0) break;
@@ -391,6 +394,7 @@ export async function simulateFight(spieler1, spieler2) {
     if (s2.doppelschlag > 0) {
       const zufall = Math.floor(Math.random() * 200) + 1;
       if ((s2.doppelschlag - s2.glueck) < zufall) {
+        stats[s2.user_id].doppelschlag_gemacht++;
         await protokolliere("doppelschlag", 0, randomText("doppelschlag", s2.username), s2.user_id, s1.user_id);
         await angriff(s2, s1);
       }
@@ -487,6 +491,7 @@ export async function simulateFight(spieler1, spieler2) {
     stats[gewinner.user_id].höchster_schaden_mit_einem_schlag,
     gewinner.user_id
   ]);
+
 
 
 
@@ -607,6 +612,12 @@ if (xpNaechstesLevelG && aktuellerXP_G >= xpNaechstesLevelG) {
     ]);
 
  
+    // Erfolgschecks
+    await checkErfolgeNachKampf(gewinner.user_id);
+    await checkErfolgeNachKampf(verlierer.user_id);
+
+
+
 return {
   kampfId: kampfId,
   belohnungGewinner: {

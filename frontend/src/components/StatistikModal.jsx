@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import Loader from "./Loader";
+import { useGame } from "../context/GameContext";
 
 const METRICS = [
   { label: "Siege", value: "siege" },
@@ -21,9 +22,10 @@ const METRICS = [
 export default function StatistikModal({ onClose }) {
   const [stats, setStats] = useState(null);
   const [metric, setMetric] = useState("siege");
-  const [ranking, setRanking] = useState([]);
+  const [kaempfe, setKaempfe] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [loadingRanking, setLoadingRanking] = useState(true);
+  const [loadingKaempfe, setLoadingKaempfe] = useState(true);
+  const { spieler, poernomon } = useGame();
 
   useEffect(() => {
     const loadStats = async () => {
@@ -43,13 +45,14 @@ export default function StatistikModal({ onClose }) {
   useEffect(() => {
     const loadRanking = async () => {
       try {
-        setLoadingRanking(true);
-        const res = await api.get(`/statistik/ranking/${metric}`);
-        setRanking(res.data);
+        setLoadingKaempfe(true);
+        const res = await api.get(`/statistik/kaempfe`);
+        setKaempfe(res.data);
+        console.log(res.data);
       } catch (err) {
         console.error("Fehler beim Laden des Rankings:", err);
       } finally {
-        setLoadingRanking(false);
+        setLoadingKaempfe(false);
       }
     };
     loadRanking();
@@ -149,35 +152,95 @@ export default function StatistikModal({ onClose }) {
 
         {/* Rechte Seite: Ranking */}
         <div className="w-1/2 pl-6 overflow-y-auto">
-          <h3 className="text-xl font-bold mb-4">
-            🏆 Ranking nach {METRICS.find(m => m.value === metric)?.label}
-          </h3>
-          {loadingRanking ? (
+          <h3 className="text-xl font-bold mb-4">⚔️ Deine Kämpfe</h3>
+          {loadingKaempfe ? (
             <div className="flex justify-center items-center h-full"><Loader /></div>
           ) : (
             <div className="space-y-4">
-              {ranking.map((spieler, idx) => (
-                <div key={spieler.user_id} className="flex items-center bg-gray-800 p-3 rounded gap-4 shadow">
-                  <div className="relative w-[130px] h-[130px] flex-shrink-0">
-                    {spieler.background_bild && (
-                      <img src={`/${spieler.background_bild}`} className="absolute w-full h-full" alt="bg"/>
-                    )}
-                    <img src={`/${spieler.kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
-                    {spieler.frame_bild && (
-                      <img src={`/${spieler.frame_bild}`} className="absolute w-full h-full" alt="frame"/>
-                    )}
-                  </div>
-                  <div className="flex flex-col justify-center">
-                    <div className="font-bold text-lg">{idx + 1}. {spieler.username}</div>
-                    <div className="text-sm text-gray-400">
-                      {METRICS.find(m => m.value === metric)?.label}: <span className="font-semibold">{spieler[metric]}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {kaempfe.map((kampf, idx) => {
+  const hastMehrAngegriffen = kampf.angriffe_von_dir > kampf.gesamt_kaempfe / 2;
+
+  return (
+    <div key={idx} className="flex items-center bg-gray-800 p-3 rounded gap-4 shadow">
+      {hastMehrAngegriffen ? (
+        <>
+          {/* Dein Bild links */}
+          <div className="relative w-[100px] h-[100px] flex-shrink-0">
+            {poernomon.background_bild && (
+              <img src={`/${poernomon.background_bild}`} className="absolute w-full h-full" alt="bg"/>
+            )}
+            <img src={`/${poernomon.kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+            {poernomon.frame_bild && (
+              <img src={`/${poernomon.frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+            )}
+          </div>
+
+          {/* Text */}
+          <div className="flex flex-col justify-center text-sm flex-grow">
+            <div>
+              Du hast <span className="font-bold">{kampf.gegner_username}</span> insgesamt <span className="font-bold">{kampf.angriffe_von_dir}</span>x angegriffen.
+            </div>
+            <div className="text-gray-400">
+              Ihr habt insgesamt <span className="font-bold">{kampf.gesamt_kaempfe}</span>x gekämpft,
+              du hast <span className="font-bold">{kampf.siege_von_dir}</span>x gewonnen.
+            </div>
+          </div>
+
+          {/* Gegner rechts */}
+          <div className="relative w-[100px] h-[100px] flex-shrink-0">
+            {kampf.gegner_background_bild && (
+              <img src={`/${kampf.gegner_background_bild}`} className="absolute w-full h-full" alt="bg"/>
+            )}
+            <img src={`/${kampf.gegner_kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+            {kampf.gegner_frame_bild && (
+              <img src={`/${kampf.gegner_frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Gegner links */}
+          <div className="relative w-[100px] h-[100px] flex-shrink-0">
+            {kampf.gegner_background_bild && (
+              <img src={`/${kampf.gegner_background_bild}`} className="absolute w-full h-full" alt="bg"/>
+            )}
+            <img src={`/${kampf.gegner_kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+            {kampf.gegner_frame_bild && (
+              <img src={`/${kampf.gegner_frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+            )}
+          </div>
+
+          {/* Text */}
+          <div className="flex flex-col justify-center text-sm flex-grow">
+            <div>
+              <span className="font-bold">{kampf.gegner_username}</span> hat dich insgesamt <span className="font-bold">{kampf.gesamt_kaempfe - kampf.angriffe_von_dir}</span>x angegriffen.
+            </div>
+            <div className="text-gray-400">
+              Ihr habt insgesamt <span className="font-bold">{kampf.gesamt_kaempfe}</span>x gekämpft,
+              du hast <span className="font-bold">{kampf.siege_von_dir}</span>x gewonnen.
+            </div>
+          </div>
+
+          {/* Dein Bild rechts */}
+          <div className="relative w-[100px] h-[100px] flex-shrink-0">
+            {poernomon.background_bild && (
+              <img src={`/${poernomon.background_bild}`} className="absolute w-full h-full" alt="bg"/>
+            )}
+            <img src={`/${poernomon.kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+            {poernomon.frame_bild && (
+              <img src={`/${poernomon.frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+})}
+
             </div>
           )}
         </div>
+
       </div>
 
       <div className="text-center mt-6">

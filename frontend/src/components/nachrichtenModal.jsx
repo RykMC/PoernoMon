@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-
+import { useGame } from "../context/GameContext";
 
 export default function NachrichtenModal({ onClose}) {
   const [nachrichten, setNachrichten] = useState([]);
   const [ausgewaehlt, setAusgewaehlt] = useState(null);
+  const { fetchNachrichten, fetchSpieler  } = useGame();
 
   useEffect(() => {
-    const fetchNachrichten = async () => {
+    const fetchNachrichtenAnzahl = async () => {
       try {
         const res = await api.get("/nachrichten"); // bestehender Endpunkt
         setNachrichten(res.data);
@@ -16,13 +17,15 @@ export default function NachrichtenModal({ onClose}) {
         console.error("Fehler beim Laden der Nachrichten:", err);
       }
     };
-    fetchNachrichten();
+    fetchNachrichtenAnzahl();
   }, []);
 
     const handleSelectNachricht = async (nachricht) => {
     try {
         const res = await api.get(`/nachrichten/${nachricht.id}`);
         setAusgewaehlt(res.data); // enthält auch text
+        await fetchNachrichten();
+        await fetchSpieler();
     } catch (err) {
         console.error("Fehler beim Laden der Nachricht:", err);
     }
@@ -77,7 +80,10 @@ export default function NachrichtenModal({ onClose}) {
     </div>
         <div className="text-center mt-6">
             <button
-            onClick={onClose}
+            onClick={() => {
+                fetchSpieler();
+                onClose();
+              }}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
             >
             Schließen

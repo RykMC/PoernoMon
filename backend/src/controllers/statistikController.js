@@ -81,7 +81,9 @@ export async function getRanking(req, res) {
       "items_gekauft",
       "items_verkauft",
       "items_gecraftet",
-      "kaempfe_insgesamt"
+      "kaempfe_insgesamt",
+      "höchste_niederlagen_in_folge",
+      "niederlagen_in_folge"
    ];
     if (!allowed.includes(metric)) {
       return res.status(400).json({ error: "Ungültiges Ranking-Attribut" });
@@ -98,6 +100,7 @@ export async function getRanking(req, res) {
         FROM spieler s
         LEFT JOIN designs df ON df.id = s.frame_id
         LEFT JOIN designs db ON db.id = s.background_id
+        WHERE s.user_id != 0
         ORDER BY s.${metric} DESC
         LIMIT 50
     `);
@@ -108,3 +111,41 @@ export async function getRanking(req, res) {
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 }
+
+export async function getKaempfeStatistik(req, res) {
+  try {
+    const userId = req.user.userId;
+
+    const result = await pool.query(`
+      SELECT 
+        gegner.user_id AS gegner_user_id,
+        gegner.username AS gegner_username,
+        gegner.kreatur_bild AS gegner_kreatur_bild,
+        df.bild AS gegner_frame_bild,
+        db.bild AS gegner_background_bild,
+
+        COUNT(*) AS gesamt_kaempfe,
+        SUM(CASE WHEN k.spieler1_id = $1 THEN 1 ELSE 0 END) AS angriffe_von_dir,
+        SUM(CASE WHEN k.gewinner_id = $1 THEN 1 ELSE 0 END) AS siege_von_dir
+
+      FROM kaempfe k
+      JOIN spieler a ON a.user_id = k.spieler1_id
+      JOIN spieler v ON v.user_id = k.spieler2_id
+      JOIN spieler gegner ON
+           (a.user_id = $1 AND v.user_id != $1 AND gegner.user_id = v.user_id)
+        OR (v.user_id = $1 AND a.user_id != $1 AND gegner.user_id = a.user_id)
+      LEFT JOIN designs df ON df.id = gegner.frame_id
+      LEFT JOIN designs db ON db.id = gegner.background_id
+      WHERE a.user_id = $1 OR v.user_id = $1
+      GROUP BY gegner.user_id, gegner.username, gegner.kreatur_bild, df.bild, db.bild
+      ORDER BY gesamt_kaempfe DESC
+    `, [userId]);
+    console.log(result.rows);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Fehler beim Laden der Kampf-Statistik:", err);
+    res.status(500).json({ error: "Interner Serverfehler" });
+  }
+}
+
+

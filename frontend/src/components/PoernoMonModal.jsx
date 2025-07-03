@@ -4,26 +4,27 @@ import ProfilModal from "./ProfilModal";
 import { useGame } from "../context/GameContext";
 
 export default function PoernoMonModal({ setModalContent, setShowModal }) {
-  const { poernomon, fetchPoernomon } = useGame();
+  const { poernomon, fetchPoernomon, fetchSpieler } = useGame();
 
   const rarityStyles = (seltenheit) => {
     switch (seltenheit) {
       case 'legendär':
         return {
           border: "border-yellow-400 border-4",
-          bg: "bg-yellow-400/10",
+          bg: "bg-yellow-400/50",
           shadow: "shadow-yellow-500/50"
         };
       case 'selten':
         return {
           border: "border-blue-300 border-2",
-          bg: "bg-blue-300/10",
+          bg: "bg-blue-300/50",
           shadow: "shadow-blue-500/40"
         };
+        
       default:
         return {
           border: "border-gray-600",
-          bg: "bg-gray-600/10",
+          bg: "bg-gray-600/50",
           shadow: "shadow-gray-500/30"
         };
     }
@@ -38,7 +39,8 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
     try {
       console.log(key);
       await api.post("/poernomon/skill", { eigenschaft: key });
-      await fetchPoernomon(); // damit direkt Context + UI aktualisiert werden
+      await fetchPoernomon(); 
+      await fetchSpieler();
     } catch (err) {
       console.error("Skillpunkt konnte nicht vergeben werden", err);
     }
@@ -88,9 +90,13 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
           {/* Linke Seite */}
           <div className="bg-gray-800/50 p-6 rounded-xl">
             <h3 className="text-xl font-semibold mb-2 text-center">{poernomon.name}</h3>
-            {poernomon.skillpunkte > 0 && (
+            {poernomon.skillpunkte > 0 ? (
               <p className="text-center text-yellow-400 text-sm mb-2">
                 Verfügbare Skillpunkte: {poernomon.skillpunkte}
+              </p>
+            ) : (
+              <p className="text-center text-green-400 text-sm mb-2">
+                Level: {poernomon.level}
               </p>
             )}
             
@@ -171,7 +177,7 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
                         {poernomon.skillpunkte > 0 && (
                           <button
                             onClick={() => handleSkill(e.key)}
-                            className="text-green-400 hover:text-green-300 text-sm font-bold cursor-pointer"
+                            className="text-green-400 hover:text-green-300 font-bold cursor-pointer hover:scale-125 hover:rotate-6 transition-transform duration-100 ease-in-out animate-bounce"
                             title={`+1 auf ${e.label}`}
                           >
                             ＋
@@ -224,8 +230,9 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
 
                     {/* Die Card darunter */}
                     <div
-                      className={`w-40 md:w-46 h-52 md:h-56 rounded-2xl p-5 text-center transform transition hover:scale-105
-                                  ${style.bg} ${style.border} shadow-xl ${style.shadow}`}
+                      className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center transform transition hover:scale-105
+                        shadow-xl ${item ? `${style.bg} ${style.border} ${style.shadow}` : ""}`
+                      }
                     >
                       {item ? (
                         <>
