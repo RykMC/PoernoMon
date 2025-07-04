@@ -62,6 +62,7 @@ export async function equipItem(req, res) {
       `UPDATE items SET angelegt = 0 WHERE userid = $1 AND typ = $2`,
       [userId, slot]
     );
+    
 
     if (!itemId) {
       return res.json({ success: true });
@@ -197,11 +198,12 @@ export async function craftItem(req, res) {
     const datum = Math.floor(Date.now() / 1000) + 86400;
 
     // Einfügen
-    await pool.query(`
+    const newItemRes = await pool.query(`
       INSERT INTO items 
       (userid, typ, bonus1was, bonus1wert, bonus2was, bonus2wert, bonus3was, bonus3wert, bezeichnung, bild, datum, im_shop, angelegt, level, seltenheit)
       VALUES 
       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 0, 0, $12, $13)
+      RETURNING *
     `, [
       userId,
       itemTyp,
@@ -218,8 +220,14 @@ export async function craftItem(req, res) {
       seltenheit
     ]);
 
+    const newItem = newItemRes.rows[0];
+
     await checkErfolgeNachCraft(userId);
-    res.json({ success: true, message: `Du hast ein ${seltenheit}es Item gecraftet!` });
+    return res.json({ 
+      success: true,
+      message: `Du hast ein ${seltenheit}es Item gecraftet!`,
+      item: newItem
+    });
   } catch (err) {
     console.error("Fehler beim Craften:", err);
     res.status(500).json({ error: "Serverfehler" });

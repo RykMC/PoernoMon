@@ -140,7 +140,6 @@ export async function getKaempfeStatistik(req, res) {
       GROUP BY gegner.user_id, gegner.username, gegner.kreatur_bild, df.bild, db.bild
       ORDER BY gesamt_kaempfe DESC
     `, [userId]);
-    console.log(result.rows);
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Laden der Kampf-Statistik:", err);

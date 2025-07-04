@@ -145,3 +145,62 @@ export const getRandomPoernomon = async (req, res) => {
     res.status(500).json({ error: "Serverfehler beim Laden." });
   }
 };
+
+
+
+export const getRandomName = async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    // 1. Einen zufälligen Namen ziehen
+    const result = await pool.query(
+      "SELECT id, name FROM namen ORDER BY RANDOM() LIMIT 1"
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Keine Namen mehr verfügbar" });
+    }
+
+    const { id, name } = result.rows[0];
+
+    // 2. Direkt aus der Tabelle löschen
+    await pool.query("DELETE FROM namen WHERE id = $1", [id]);
+
+    // 3. zum Bot machen
+      await pool.query(
+        "UPDATE spieler SET username = $1, bot = 1 WHERE user_id = $2",
+        [name, userId]
+      );
+      
+      res.json({ name });
+  } catch (err) {
+    console.error("Fehler beim Ziehen eines Namens:", err);
+    res.status(500).json({ error: "Serverfehler beim Laden eines Namens" });
+  }
+};
+
+
+export const getRandomBotEmail = async (req, res) => {
+  try {
+    const botRes = await pool.query(`
+      SELECT u.email 
+      FROM spieler s
+      JOIN users u ON s.user_id = u.id
+      WHERE s.bot = 1
+      ORDER BY RANDOM()
+      LIMIT 1
+    `);
+
+    if (botRes.rows.length === 0) {
+      return res.status(404).json({ error: "Keine Bots gefunden" });
+    }
+    console.log("da:", botRes.rows[0]);
+    res.json({ email: botRes.rows[0].email });
+  } catch (err) {
+    console.error("Fehler beim Laden eines Bot-Accounts:", err);
+    res.status(500).json({ error: "Fehler beim Laden eines Bot-Accounts" });
+  }
+};
+
+
+
+

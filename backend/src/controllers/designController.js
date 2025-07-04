@@ -13,7 +13,6 @@ export const getUserDesigns = async (req, res) => {
     );
 
     const rows = result.rows;
-    console.log(result.rows);
     const frames = rows.filter(d => d.typ === "frame");
     const backgrounds = rows.filter(d => d.typ === "background");
 

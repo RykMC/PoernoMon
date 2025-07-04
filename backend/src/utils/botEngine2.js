@@ -23,7 +23,17 @@ function getRandomAttribute() {
   return attributes[Math.floor(Math.random() * attributes.length)];
 }
 
+async function getRandomBotEmail() {
+  try {
+    const res = await api.get("/auth/botEmail", {
 
+    });
+    return res.data.email;
+  } catch (err) {
+    console.error("❌ Fehler beim Laden eines Bot-Accounts:", err.response?.data || err);
+    return null;
+  }
+}
 
 function sumItemStats(item) {
   return (item.bonus1wert || 0) + (item.bonus2wert || 0) + (item.bonus3wert || 0);
@@ -45,18 +55,6 @@ async function loginBot(email, password) {
         console.error(`❌ Login fehlgeschlagen für ${email}`, err.response?.data || err);
         return null;
     }
-}
-
-async function getRandomBotEmail() {
-  try {
-    const res = await api.get("/auth/botEmail", {
-
-    });
-    return res.data.email;
-  } catch (err) {
-    console.error("❌ Fehler beim Laden eines Bot-Accounts:", err.response?.data || err);
-    return null;
-  }
 }
 
 async function getSpieler(token) {
@@ -167,7 +165,6 @@ async function maybeChangeDesign(token) {
 }
 
 
-
 async function createNewBot() {
   const email = getUniqueBotEmail();
   const password = "test";
@@ -257,4 +254,4 @@ async function runBot() {
 
 }
 
-export default runBot;
+runBot();

@@ -67,6 +67,7 @@ export default function Kampfseite() {
     if (kampfverlauf.length > 0 && spieler1 && spieler2) {
       if (index > 0 && index <= kampfverlauf.length) {
         const aktuellerEintrag = kampfverlauf[index - 1];
+
         if (aktuellerEintrag && aktuellerEintrag.schaden > 0) {
           if (aktuellerEintrag.verteidiger_id === spieler1.user_id) {
             setFloatingDamage1(prev => [...prev, aktuellerEintrag.schaden]);
@@ -80,26 +81,33 @@ export default function Kampfseite() {
             }, 1000);
           }
         }
+
         if (aktuellerEintrag.angreifer_id === spieler1.user_id) {
           setLeben1(aktuellerEintrag.leben_angreifer_nachher);
-          setLeben2(aktuellerEintrag.leben_verteidiger_nachher);
-        } else if (aktuellerEintrag.angreifer_id === spieler2.user_id) {
-          setLeben2(aktuellerEintrag.leben_angreifer_nachher);
+        }
+        if (aktuellerEintrag.verteidiger_id === spieler1.user_id) {
           setLeben1(aktuellerEintrag.leben_verteidiger_nachher);
         }
+        if (aktuellerEintrag.angreifer_id === spieler2.user_id) {
+          setLeben2(aktuellerEintrag.leben_angreifer_nachher);
+        }
+        if (aktuellerEintrag.verteidiger_id === spieler2.user_id) {
+          setLeben2(aktuellerEintrag.leben_verteidiger_nachher);
+        }
+
       } else if (index === 0) {
         setLeben1(spieler1.leben);
         setLeben2(spieler2.leben);
       }
     }
 
-    if (index < kampfverlauf.length) {
-      const timeout = setTimeout(() => {
-        setIndex(index + 1);
-      }, 1500);
-      return () => clearTimeout(timeout);
-    }
-  }, [index, kampfverlauf, spieler1, spieler2]);
+    if (kampfverlauf.length > 0 && spieler1 && spieler2 && index < kampfverlauf.length) {
+    const timeout = setTimeout(() => {
+      setIndex(index + 1);
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }
+  }, [index, kampfverlauf]);
 
   useEffect(() => {
   if (logRef.current) {

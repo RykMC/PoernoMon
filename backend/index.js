@@ -9,6 +9,7 @@ import nachrichtenRouter from './src/routes/nachrichtenRouter.js';
 import statistikRouter from './src/routes/statistikRouter.js';
 import itemRouter from './src/routes/itemRouter.js';
 import shopRouter from './src/routes/shopRouter.js';
+import runBot from './src/utils/botEngine.js'
 
 import { healPoernos } from "./src/utils/healingCron.js";
 
@@ -39,12 +40,17 @@ app.use('/api/items', itemRouter);
 app.use('/api/shop', shopRouter);
 
 
-
 setInterval(() => {
   healPoernos();
   console.log("heilung startet...");
-}, 60 * 1000); // jede Minute
 
+  // 1/10 Chance, also 10%
+  if (Math.random() < 0.5) {
+    console.log("🎲 Zufalls-Chance getroffen: Bot wird gestartet!");
+    runBot();
+  }
+
+}, 60 * 1000);
 
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server läuft auf Port", process.env.PORT || 5000);

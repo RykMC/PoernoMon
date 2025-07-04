@@ -226,7 +226,7 @@ export default function Dashboard() {
       />
       <div className="">
         <img src="/images/global/konsole.png" alt="Konsole" className="w-full h-[17em] " />
-        <div className="absolute left-[5em] bottom-[4em]">
+        <div className="absolute left-[6em] bottom-[3em]">
           <img src="/images/global/bildschirm.png" alt="Konsole" className="h-[12em] w-[24em]" />
         <div className="absolute left-13 top-3 w-[21em] h-[11em] text-green-400 p-4 font-mono text-sm overflow-y-auto">
         {consoleMessages.map((msg, index) => (
@@ -258,7 +258,7 @@ export default function Dashboard() {
       
       <button onClick={() => setConfirmFight(true)}
               disabled={spieler.leben < 30}
-              className=" absolute right-[10%] bottom-[14%] w-[10vw] h-[10vw] max-w-[150px] max-h-[150px] disabled:opacity-50 cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+              className=" absolute right-[10%] bottom-[13%] w-[10vw] h-[10vw] max-w-[150px] max-h-[150px] disabled:opacity-50 cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
                 <img src="/images/global/fbutton.png" className="w-[10vw] max-w-[10vw]" />
         <span className="sr-only">Fight</span>
       </button>

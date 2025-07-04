@@ -630,6 +630,9 @@ return {
     staub: staubV,
     coins: coinsV
   },
-  gewinnerId: gewinner.user_id
+  gewinnerId: gewinner.user_id,
+   level3_erreicht: 
+    ((nextLevelG.rows[0] && aktuellerXP_G >= xpNaechstesLevelG && aktuellesLevel_G + 1 === 3) ||
+     (nextLevelV.rows[0] && aktuellerXP_V >= xpNaechstesLevelV && aktuellesLevel_V + 1 === 3))
 };
 }
