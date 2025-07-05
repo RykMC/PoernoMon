@@ -9,13 +9,16 @@ import nachrichtenRouter from './src/routes/nachrichtenRouter.js';
 import statistikRouter from './src/routes/statistikRouter.js';
 import itemRouter from './src/routes/itemRouter.js';
 import shopRouter from './src/routes/shopRouter.js';
+import chatRouter from './src/routes/chatRouter.js';
 import runBot from './src/utils/botEngine.js'
+
 
 import { healPoernos } from "./src/utils/healingCron.js";
 
 dotenv.config();
 
 const jwtSecret = process.env.JWT_SECRET || 'supersecret';
+
 
 const app = express();
 app.use(cors());
@@ -38,6 +41,8 @@ app.use('/api/statistik', statistikRouter);
 app.use('/api/items', itemRouter);
 
 app.use('/api/shop', shopRouter);
+
+app.use('/api/chat', chatRouter);
 
 
 setInterval(() => {

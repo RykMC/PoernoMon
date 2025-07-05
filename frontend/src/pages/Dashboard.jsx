@@ -7,6 +7,7 @@ import ItemModal from "../components/ItemModal";
 import ShopModal from "../components/ShopModal";
 import RankingModal from "../components/RankingModal";
 import ErfolgsModal from "../components/ErfolgsModal";
+import CommunicatorModal from "../components/CommunicatorModal";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import { useGame } from "../context/GameContext";
@@ -17,7 +18,7 @@ export default function Dashboard() {
   const [confirmFight, setConfirmFight] = useState(false);
   const [loadingFight, setLoadingFight] = useState(false);
   const navigate = useNavigate();
-  const { spieler, ungeleseneNachrichten, fetchSpieler, fetchNachrichten} = useGame();
+  const { spieler, ungeleseneNachrichten, fetchSpieler, fetchNachrichten, fetchPoernomon} = useGame();
   const [consoleMessages, setConsoleMessages] = useState(["Willkommen zurück, ich bin fit und bereit für den Kampf!"]);
 
   useEffect(() => {
@@ -48,9 +49,19 @@ export default function Dashboard() {
     fetchNachrichten();
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      console.log("🔄 Automatisches Update von Spieler & Poernomon...");
+      await fetchSpieler();
+      await fetchPoernomon();
+    }, 60 * 1000); // alle 60 Sekunden
+
+    return () => clearInterval(interval); // Cleanup beim Verlassen
+  }, []);
+
     function addConsoleMessage(message) {
-    setConsoleMessages([message]);
-  }
+      setConsoleMessages([message]);
+    }
 
     useEffect(() => {
     if (!spieler) return;
@@ -212,34 +223,45 @@ export default function Dashboard() {
               localStorage.removeItem("token");
               window.location.href = "/";
             }}
-            className="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition-all text-sm shadow-md"
+            className=" text-white px-4 py-2 rounded-xl"
           >
-            🚪 Logout
+            <img src="/images/global/logoutbutton.png" alt="Konsole" className="h-12 cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]" />
           </button>
         </div>
       </header>
       
       <main className="flex-grow relative">
       <PoernoMonModal
+        addConsoleMessage={addConsoleMessage}
         setModalContent={setModalContent}
         setShowModal={setShowModal}
       />
       <div className="">
         <img src="/images/global/konsole.png" alt="Konsole" className="w-full h-[17em] " />
-        <div className="absolute left-[6em] bottom-[3em]">
+        <div className="absolute left-[6em] bottom-[3em]"
+          onClick={() => { setModalContent(<CommunicatorModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
+        >
           <img src="/images/global/bildschirm.png" alt="Konsole" className="h-[12em] w-[24em]" />
         <div className="absolute left-13 top-3 w-[21em] h-[11em] text-green-400 p-4 font-mono text-sm overflow-y-auto">
         {consoleMessages.map((msg, index) => (
-              <div key={index}>{msg}</div>
+          <>
+            <div className="console">
+              {consoleMessages.map((msg, idx) => (
+                <div key={idx}>{msg}</div>
+              ))}
+            </div>
+
+            
+          </>
             ))}
         </div>
       </div>
-      <button onClick={() => { setModalContent(<ItemModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
+      <button onClick={() => { setModalContent(<ItemModal addConsoleMessage={addConsoleMessage} onClose={() => setShowModal(false)} />); setShowModal(true); }}
               className="absolute left-[26%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
                 <img src="/images/global/abutton.png" className="w-[12vw] max-w-[150px]" />
         <span className="sr-only">Ausrüstung</span>
       </button>
-      <button onClick={() => { setModalContent(<ShopModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
+      <button onClick={() => { setModalContent(<ShopModal addConsoleMessage={addConsoleMessage} onClose={() => setShowModal(false)} />); setShowModal(true); }}
               className="absolute left-[35%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
                 <img src="/images/global/hbutton.png" className="w-[12vw] max-w-[150px]" />
       </button>

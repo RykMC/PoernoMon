@@ -6,38 +6,7 @@ export async function getSpielerStats(req, res) {
     const userId = req.user.userId;
 
     const result = await pool.query(`
-      SELECT
-        siege,
-        niederlagen,
-        siege_in_folge,
-        niederlagen_in_folge,
-        höchste_siege_in_folge,
-        höchste_niederlagen_in_folge,
-        gesamt_schaden_ausgeteilt,
-        gesamt_schaden_erhalten,
-        kritische_treffer,
-        kritische_treffer_erhalten,
-        ausgewichen,
-        angriffe_verfehlt,
-        items_gecraftet,
-        items_gekauft,
-        items_verkauft,
-        gesamt_coins_verdient,
-        coins_ausgegeben,
-        gesamt_kampfstaub_verdient,
-        kampfstaub_ausgegeben,
-        höchster_schaden_mit_einem_schlag,
-        höchste_xp_in_einem_kampf,
-        höchster_gewinn_in_coins,
-        höchste_kampfstaub_in_einem_kampf,
-        geblockter_schaden,
-        kaempfe_insgesamt,
-        level,
-        xp
-
-      FROM spieler
-      WHERE user_id = $1
-    `, [userId]);
+      SELECT * FROM spieler WHERE user_id = $1`, [userId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Spieler nicht gefunden" });

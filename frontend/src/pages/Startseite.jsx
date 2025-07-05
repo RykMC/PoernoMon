@@ -23,7 +23,7 @@ export default function Startseite() {
           console.error("Fehler beim Laden des PoernoMons:", err);
         }
       }, 2000);
-    }, 10000);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -54,13 +54,13 @@ export default function Startseite() {
         <div className="flex gap-4">
           <button
             onClick={() => setMode("login")}
-            className={`${mode === "login" ? "bg-yellow-400" : "bg-gray-400/40"} px-4 py-1 rounded`}
+            className={`${mode === "login" ? "bg-[#39B9FD]" : "bg-gray-400/40"} px-4 py-1 rounded`}
           >
             Sign In
           </button>
           <button
             onClick={() => setMode("register")}
-            className={`${mode === "register" ? "bg-yellow-400" : "bg-gray-400/40"} px-4 py-1 rounded`}
+            className={`${mode === "register" ? "bg-[#39B9FD]" : "bg-gray-400/40"} px-4 py-1 rounded`}
           >
             Register
           </button>
@@ -84,7 +84,7 @@ export default function Startseite() {
           />
           <button
             type="submit"
-            className="px-4 py-1 bg-yellow-400 rounded hover:bg-yellow-300"
+            className="px-4 py-1 bg-[#39B9FD] rounded "
           >
             {mode === "login" ? "Login" : "Registrieren"}
           </button>

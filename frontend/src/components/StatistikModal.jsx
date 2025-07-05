@@ -3,25 +3,9 @@ import api from "../api/axios";
 import Loader from "./Loader";
 import { useGame } from "../context/GameContext";
 
-const METRICS = [
-  { label: "Siege", value: "siege" },
-  { label: "Niederlagen", value: "niederlagen" },
-  { label: "Siege in Folge", value: "siege_in_folge" },
-  { label: "Höchste Siege in Folge", value: "höchste_siege_in_folge" },
-  { label: "Gesamt Schaden ausgeteilt", value: "gesamt_schaden_ausgeteilt" },
-  { label: "Gesamt Schaden erhalten", value: "gesamt_schaden_erhalten" },
-  { label: "Kritische Treffer", value: "kritische_treffer" },
-  { label: "Ausgewichen", value: "ausgewichen" },
-  { label: "XP", value: "xp" },
-  { label: "Level", value: "level" },
-  { label: "Geblockter Schaden", value: "geblockter_schaden" },
-  { label: "Items gekauft", value: "items_gekauft" },
-  { label: "Coins verdient", value: "gesamt_coins_verdient" }
-];
 
 export default function StatistikModal({ onClose }) {
   const [stats, setStats] = useState(null);
-  const [metric, setMetric] = useState("siege");
   const [kaempfe, setKaempfe] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingKaempfe, setLoadingKaempfe] = useState(true);
@@ -56,7 +40,7 @@ export default function StatistikModal({ onClose }) {
       }
     };
     loadRanking();
-  }, [metric]);
+  }, []);
 
   function berechneSiegquote() {
     if (!stats) return "-";
@@ -66,21 +50,7 @@ export default function StatistikModal({ onClose }) {
 
   return (
     <div className="flex flex-col w-full max-w-7xl text-white">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Deine Statistik & Ranking</h2>
-        <select
-          className="bg-gray-800 text-white p-2 rounded"
-          value={metric}
-          onChange={(e) => setMetric(e.target.value)}
-        >
-          {METRICS.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
+      
       <div className="flex flex-grow h-120">
         {/* Linke Seite: Stats */}
         <div className="w-1/2 border-r border-white/20 overflow-y-auto pr-6">
@@ -144,6 +114,8 @@ export default function StatistikModal({ onClose }) {
                   <div className="flex justify-between"><span>Items gekauft</span><span>{stats.items_gekauft}</span></div>
                   <div className="flex justify-between"><span>Items verkauft</span><span>{stats.items_verkauft}</span></div>
                   <div className="flex justify-between"><span>Items gecraftet</span><span>{stats.items_gecraftet}</span></div>
+                  <div className="flex justify-between"><span>Items zerstört</span><span>{stats.items_entcraftet}</span></div>
+                  <div className="flex justify-between"><span>Kampfstaub durch Zerstörung</span><span>{stats.kampfstaub_durch_entcraften}</span></div>
                 </div>
               </div>
             </div>
@@ -158,7 +130,7 @@ export default function StatistikModal({ onClose }) {
           ) : (
             <div className="space-y-4">
               {kaempfe.map((kampf, idx) => {
-  const hastMehrAngegriffen = kampf.angriffe_von_dir > kampf.gesamt_kaempfe / 2;
+          const hastMehrAngegriffen = kampf.angriffe_von_dir > kampf.gesamt_kaempfe / 2;
 
   return (
     <div key={idx} className="flex items-center bg-gray-800 p-3 rounded gap-4 shadow">

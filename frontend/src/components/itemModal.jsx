@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import Lottie from "lottie-react";
 import api from "../api/axios";
 import Loader from "./Loader";
 import { useGame } from "../context/GameContext";
 
-export default function AusrüstungsModal({ onClose }) {
+
+export default function AusrüstungsModal({ onClose, addConsoleMessage  }) {
   const [loading, setLoading] = useState(true);
   const [crafting, setCrafting] = useState(false);
   const [showSellModal, setShowSellModal] = useState(false);
@@ -15,6 +17,9 @@ export default function AusrüstungsModal({ onClose }) {
   const [selectedUnsellItemId, setSelectedUnsellItemId] = useState(null);
   const [showUsePotionModal, setShowUsePotionModal] = useState(false);
   const [selectedPotionId, setSelectedPotionId] = useState(null);
+  const [showCraftAnimation, setShowCraftAnimation] = useState(false);
+  const [craftAnimationData, setCraftAnimationData] = useState(null);
+
   const { fetchSpieler, fetchPoernomon, fetchItems, fetchNachrichten, spieler, items } = useGame();
 
 
@@ -24,6 +29,13 @@ export default function AusrüstungsModal({ onClose }) {
     fetchSpieler();
     fetchItems();
   }, []);
+
+  useEffect(() => {
+  fetch("/images/global/craft.json")
+    .then((res) => res.json())
+    .then((data) => setCraftAnimationData(data));
+}, []);
+
 
   const loadData = async () => {
     try {
@@ -43,26 +55,37 @@ export default function AusrüstungsModal({ onClose }) {
 
 const handleUsePotionConfirm = async () => {
   try {
-    await api.post(`/items/${selectedPotionId}/use`);
+    const res = await api.post(`/items/${selectedPotionId}/use`);
     setShowUsePotionModal(false);
     await fetchSpieler();
     await fetchPoernomon();
     await fetchItems();
+    addConsoleMessage(res.data.message);
   } catch (err) {
+    addConsoleMessage(err);
     console.error("Fehler beim Benutzen des Tranks:", err);
   }
+};
+
+const startCraftingWithAnimation = () => {
+  setShowCraftAnimation(true);
+  setTimeout(async () => {
+    await handleCraft();
+    setShowCraftAnimation(false);
+  }, 6000); 
 };
 
   const handleCraft = async () => {
     try {
       setCrafting(true);
-      await api.post("/items/craft");
+     const res = await api.post("/items/craft");
       await loadData();
       await fetchPoernomon();
       await fetchItems();
       await fetchSpieler();
+      addConsoleMessage(res.data.message);
     } catch (err) {
-      alert("Fehler beim Craften: ", err);
+      addConsoleMessage("❌ Fehler beim Craften.");
     } finally {
       setCrafting(false);
     }
@@ -75,12 +98,14 @@ const handleUsePotionConfirm = async () => {
 
   const handleDestroyConfirm = async () => {
     try {
-      await api.post(`/items/${selectedDestroyItemId}/destroy`);
+     const res = await api.post(`/items/${selectedDestroyItemId}/destroy`);
       setShowDestroyModal(false);
       await loadData();
       await fetchSpieler();
       await fetchItems();
+      addConsoleMessage(res.data.message);
     } catch (err) {
+      addConsoleMessage(err.response?.data?.error || err.message || "Unbekannter Fehler beim Verkaufen");
       console.error("Fehler beim Vernichten:", err);
     }
   };
@@ -92,12 +117,14 @@ const handleUsePotionConfirm = async () => {
 
   const handleSellConfirm = async () => {
     try {
-      await api.post(`/items/${selectedItemId}/sell`, { preis: sellPrice });
+     const res =await api.post(`/items/${selectedItemId}/sell`, { preis: sellPrice });
       setShowSellModal(false);
       await loadData();
       await fetchSpieler();
       await fetchItems();
+      addConsoleMessage(res.data.message);
     } catch (err) {
+      addConsoleMessage(err.response?.data?.error || err.message || "Unbekannter Fehler beim Verkaufen");
       console.error("Fehler beim Verkaufen:", err);
     }
   };
@@ -110,13 +137,14 @@ const handleUsePotionConfirm = async () => {
   const handleUnsellConfirm = async () => {
     try {
       console.log("id: ", selectedUnsellItemId);
-      await api.post(`/items/${selectedUnsellItemId}/unsell`);
-      
+      const res = await api.post(`/items/${selectedUnsellItemId}/unsell`);
       setShowUnsellModal(false);
       await loadData();
       await fetchSpieler();
       await fetchItems();
+      addConsoleMessage(res.data.message);
     } catch (err) {
+      addConsoleMessage(err);
       console.error("Fehler beim aus Shop nehmen:", err);
     }
   };
@@ -152,7 +180,7 @@ const handleUsePotionConfirm = async () => {
 
       <div className="bg-gray-800/50 p-6 rounded-xl mb-8 text-center ">
         <button
-          onClick={handleCraft}
+          onClick={startCraftingWithAnimation}
           disabled={crafting || (spieler && spieler.kampfstaub < 500)}
           className={`px-6 py-2 rounded text-lg font-bold shadow ${
             crafting || (spieler && spieler.kampfstaub < 500)
@@ -163,7 +191,7 @@ const handleUsePotionConfirm = async () => {
           {crafting ? "Crafting..." : "zufälliges Item craften"}
         </button>
         <div className="mt-2 text-sm text-gray-400">
-          Kosten: 500 Kampfstaub | Dauer: 24h
+          Kosten: 500 Kampfstaub
         </div>
       </div>
 
@@ -173,6 +201,15 @@ const handleUsePotionConfirm = async () => {
         <Loader />
       ) : (
  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 h-120">
+  {showCraftAnimation && craftAnimationData && (
+    <div className="bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-700 p-8 rounded-3xl w-full max-w-md shadow-2xl text-center relative">
+      <Lottie 
+        animationData={craftAnimationData} 
+        loop={false} 
+        className="w-50 h-50"
+      />
+    </div>
+  )}
   {items.map((item) => {
     const style = rarityStyles(item.seltenheit);
     return (
@@ -258,7 +295,6 @@ const handleUsePotionConfirm = async () => {
         <button
           onClick={async () => {
             await fetchItems();
-            await fetchSpieler();
             onClose();
           }}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"

@@ -193,7 +193,6 @@ export const getRandomBotEmail = async (req, res) => {
     if (botRes.rows.length === 0) {
       return res.status(404).json({ error: "Keine Bots gefunden" });
     }
-    console.log("da:", botRes.rows[0]);
     res.json({ email: botRes.rows[0].email });
   } catch (err) {
     console.error("Fehler beim Laden eines Bot-Accounts:", err);

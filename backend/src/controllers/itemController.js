@@ -65,7 +65,7 @@ export async function equipItem(req, res) {
     
 
     if (!itemId) {
-      return res.json({ success: true });
+       return res.json({ success: true, message: `'${slot}' wurde abgelegt.` });
     }
 
     // === 3. neues Item
@@ -107,7 +107,7 @@ export async function equipItem(req, res) {
       );
     }
 
-    res.json({ success: true });
+    res.json({ success: true, message: `Du hast ${newItem.bezeichnung} angelegt.` });
 
   } catch (err) {
     console.error("Fehler beim Ausrüsten:", err);
@@ -129,7 +129,6 @@ const genitiveMap = {
   mehr_coins: "des Reichtums",
   mehr_kampfstaub: "des Staubs"
 };
-
 
 
 export async function craftItem(req, res) {
@@ -154,50 +153,51 @@ export async function craftItem(req, res) {
       [userId]
     );
 
-    // === Item erstellen ===
+    // === Boni ohne doppelte Typen ===
     const typen = ["waffe", "kopfschutz", "brustschutz", "beinschutz"];
     const eigenschaften = Object.keys(genitiveMap);
-
     const itemTyp = typen[Math.floor(Math.random() * typen.length)];
-    const boni = [];
+
+    const boniMap = {}; // { angriff: 4, krit: 2 }
+
+    function addBonus() {
+      const typ = eigenschaften[Math.floor(Math.random() * eigenschaften.length)];
+      const wert = Math.max(1, Math.floor(Math.random() * spieler.level) + 1);
+
+      if (boniMap[typ]) {
+        boniMap[typ] += wert; // addiere wenn schon vorhanden
+      } else {
+        boniMap[typ] = wert;
+      }
+    }
 
     // Garantiert 1 Bonus
-    boni.push({
-      was: eigenschaften[Math.floor(Math.random() * eigenschaften.length)],
-      wert: Math.max(1, Math.floor(Math.random() * spieler.level) + 1)
-    });
+    addBonus();
 
     // Mit 10% Chance Bonus 2
-    if (Math.random() < 0.1) {
-      boni.push({
-        was: eigenschaften[Math.floor(Math.random() * eigenschaften.length)],
-        wert: Math.max(1, Math.floor(Math.random() * spieler.level) + 1)
-      });
-    }
+    if (Math.random() < 0.1) addBonus();
 
     // Mit weiteren 10% Chance Bonus 3
-    if (Math.random() < 0.1) {
-      boni.push({
-        was: eigenschaften[Math.floor(Math.random() * eigenschaften.length)],
-        wert: Math.max(1, Math.floor(Math.random() * spieler.level) + 1)
-      });
-    }
+    if (Math.random() < 0.1) addBonus();
 
-    // Bezeichnung bauen
+    // Map in Array konvertieren
+    const boni = Object.entries(boniMap).map(([was, wert]) => ({ was, wert }));
+
+    // Bezeichnung
     const bezeichnung = `${itemTyp.charAt(0).toUpperCase() + itemTyp.slice(1)} ${genitiveMap[boni[0].was]}`;
 
     // Bild anhand Typ
     const bild = `images/items/${itemTyp}${Math.floor(Math.random() * 16) + 1}.png`;
 
-    // Seltenheit = Rahmen (kannst du dann im Frontend auswerten)
+    // Seltenheit anhand eindeutiger Boni
     let seltenheit = "normal";
     if (boni.length === 2) seltenheit = "selten";
-    if (boni.length === 3) seltenheit = "legendär";
+    if (boni.length >= 3) seltenheit = "legendär";
 
     // Datum
     const datum = Math.floor(Date.now() / 1000) + 86400;
 
-    // Einfügen
+    // DB Insert
     const newItemRes = await pool.query(`
       INSERT INTO items 
       (userid, typ, bonus1was, bonus1wert, bonus2was, bonus2wert, bonus3was, bonus3wert, bezeichnung, bild, datum, im_shop, angelegt, level, seltenheit)
@@ -228,6 +228,7 @@ export async function craftItem(req, res) {
       message: `Du hast ein ${seltenheit}es Item gecraftet!`,
       item: newItem
     });
+
   } catch (err) {
     console.error("Fehler beim Craften:", err);
     res.status(500).json({ error: "Serverfehler" });
@@ -235,13 +236,12 @@ export async function craftItem(req, res) {
 }
 
 
-
 export const destroyItem = async (req, res) => {
   const itemId = req.params.id;
-  const userId = req.user.userId; // falls du JWT authMiddleware hast
+  const userId = req.user.userId;
 
   try {
-    // Zur Sicherheit prüfen, ob das Item dem Spieler gehört
+    // Prüfen, ob das Item dem Spieler gehört
     const itemRes = await pool.query(
       "SELECT id FROM items WHERE id = $1 AND userid = $2",
       [itemId, userId]
@@ -251,13 +251,25 @@ export const destroyItem = async (req, res) => {
       return res.status(404).json({ error: "Item nicht gefunden oder gehört dir nicht" });
     }
 
-    // Jetzt wirklich löschen
+    // Kampfstaub zwischen 3 und 15 generieren
+    const kampfstaub = Math.floor(Math.random() * 13) + 3; // 3 bis 15
+
+    // Kampfstaub gutschreiben
+    await pool.query(
+      "UPDATE spieler SET kampfstaub = kampfstaub + $1, kampfstaub_durch_entcraften = kampfstaub_durch_entcraften + $1, items_entcraftet = items_entcraftet +1 WHERE user_id = $2",
+      [kampfstaub, userId]
+    );
+
+    // Item löschen
     await pool.query(
       "DELETE FROM items WHERE id = $1 AND userid = $2",
       [itemId, userId]
     );
 
-    res.json({ success: true, message: "Item vernichtet" });
+    res.json({ 
+      success: true, 
+      message: `Item vernichtet. Du hast ${kampfstaub} Kampfstaub zurückbekommen.` 
+    });
   } catch (err) {
     console.error("Fehler beim Vernichten:", err);
     res.status(500).json({ error: "Item konnte nicht vernichtet werden" });
@@ -366,7 +378,7 @@ export const usePotion = async (req, res) => {
     );
 
     if (spielerRes.rowCount === 0) {
-      return res.status(404).json({ error: "Spieler oder Poernomon nicht gefunden." });
+      return res.status(404).json({ error: "Spieler oder PoernoMon nicht gefunden." });
     }
 
     let { leben, max_leben } = spielerRes.rows[0];

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import ProfilModal from "./ProfilModal";
 import { useGame } from "../context/GameContext";
 
-export default function PoernoMonModal({ setModalContent, setShowModal }) {
+export default function PoernoMonModal({ setModalContent, setShowModal, addConsoleMessage }) {
   const { poernomon, fetchPoernomon, fetchSpieler } = useGame();
 
   const rarityStyles = (seltenheit) => {
@@ -48,8 +48,10 @@ export default function PoernoMonModal({ setModalContent, setShowModal }) {
 
   const handleEquip = async (slot, itemId) => {
     try {
-      await api.post("/items/equip", { slot, itemId: itemId || null });
+      const row = await api.post("/items/equip", { slot, itemId: itemId || null });
       await fetchPoernomon();
+      console.log("Daten ", row.data);
+      addConsoleMessage(row.data.message);
     } catch (err) {
       console.error("Fehler beim Ausrüsten:", err);
     }

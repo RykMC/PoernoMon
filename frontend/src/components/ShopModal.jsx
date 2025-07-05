@@ -3,7 +3,7 @@ import api from "../api/axios";
 import Loader from "./Loader";
 import { useGame } from "../context/GameContext";
 
-export default function ShopModal({ onClose  })  {
+export default function ShopModal({ onClose, addConsoleMessage  })  {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -35,14 +35,17 @@ export default function ShopModal({ onClose  })  {
 
     const handleBuyConfirm = async () => {
     try {
-        await api.post(`/shop/${selectedBuyShopId}/buy`);
-        setShowBuyModal(false);
+        const row = await api.post(`/shop/${selectedBuyShopId}/buy`);
+        setShowBuyModal(false);       
         await loadData();
         await fetchSpieler();
         await fetchNachrichten();
         await fetchItems();
         await fetchPoernomon();
+        addConsoleMessage(row.data.message);
     } catch (err) {
+      addConsoleMessage(err.response?.data?.error || err.message || "Unbekannter Fehler beim kaufen");
+      setShowBuyModal(false); 
         console.error("Fehler beim Kaufen:", err);
     }
     };

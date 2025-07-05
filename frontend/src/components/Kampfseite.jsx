@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import api from "../api/axios";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useGame } from "../context/GameContext";
+import Lottie from "lottie-react";
 
 export default function Kampfseite() {
   const { kampfId } = useParams();
@@ -19,6 +20,9 @@ export default function Kampfseite() {
   const [belohnungV, setBelohnungV] = useState(location.state?.belohnungVerlierer || null);
   const [floatingDamage1, setFloatingDamage1] = useState([]);
   const [floatingDamage2, setFloatingDamage2] = useState([]);
+  const [bloodAnimation, setBloodAnimation] = useState(null);
+  const [showBlood1, setShowBlood1] = useState(false);
+  const [showBlood2, setShowBlood2] = useState(false);
 
   const [gewinnerId, setGewinnerId] = useState(location.state?.gewinnerId || null);
 
@@ -115,6 +119,25 @@ export default function Kampfseite() {
   }
 }, [index]);
 
+useEffect(() => {
+  if (index >= kampfverlauf.length && gewinnerId) {
+    if (spieler1 && spieler2) {
+      if (gewinnerId === spieler1.user_id) {
+        setShowBlood2(true); // Spieler2 hat verloren
+      } else {
+        setShowBlood1(true); // Spieler1 hat verloren
+      }
+    }
+  }
+}, [index, kampfverlauf.length, gewinnerId, spieler1, spieler2]);
+
+useEffect(() => {
+  fetch("/images/global/blood.json")
+    .then(response => response.json())
+    .then(data => setBloodAnimation(data));
+}, []);
+
+
   const lebenBalken = (leben, max) => {
     if (max === 0 || max === undefined || leben === null) {
       return (
@@ -161,6 +184,11 @@ export default function Kampfseite() {
             <img src={`/${spieler1?.bild}`} alt="Kreatur" className="absolute w-full h-full object-contain" />
             {spieler1?.frame && (
               <img src={`/${spieler1?.frame}`} alt="Frame" className="absolute w-full h-full object-contain" />
+            )}
+            {showBlood1 && bloodAnimation && (
+              <div className="absolute w-full h-full flex items-center justify-center">
+                <Lottie animationData={bloodAnimation} loop={false} style={{ width: "100%", height: "100%" }} />
+              </div>
             )}
           </div>
           {spieler1 && leben1 !== null && spieler1.leben !== undefined && index > 0 && (
@@ -251,7 +279,11 @@ export default function Kampfseite() {
             {spieler2?.frame && (
               <img src={`/${spieler2?.frame}`} alt="Frame" className="absolute w-full h-full object-contain" />
             )}
-            
+            {showBlood2 && bloodAnimation && (
+              <div className="absolute w-full h-full flex items-center justify-center">
+                <Lottie animationData={bloodAnimation} loop={false} style={{ width: "100%", height: "100%" }} />
+              </div>
+            )}
           </div>
           {spieler2 && leben2 !== null && spieler2.leben !== undefined && index > 0 && (
             <>

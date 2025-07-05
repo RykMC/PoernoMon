@@ -7,7 +7,7 @@ export async function simulateFight(spieler1, spieler2) {
   let s1 = { ...spieler1 };
   let s2 = { ...spieler2 };
 
-       
+  
   const stats = {
     [s1.user_id]: {
       siege: 0,
@@ -260,10 +260,38 @@ export async function simulateFight(spieler1, spieler2) {
 
 
 
-  const kampfInsert = await pool.query(
-    "INSERT INTO kaempfe (spieler1_id, spieler2_id) VALUES ($1, $2) RETURNING id",
-    [s1.user_id, s2.user_id]
-  );
+const kampfInsert = await pool.query(
+  `INSERT INTO kaempfe 
+  (
+    spieler1_id, spieler2_id, 
+    spieler1_level, spieler1_angriff, spieler1_krit_chance, spieler1_krit_schaden, 
+    spieler1_doppelschlag, spieler1_ausweichen, spieler1_verteidigen, 
+    spieler1_leben_pro_treffer, spieler1_max_leben, spieler1_gluck, 
+    spieler1_mehr_kampfstaub, spieler1_mehr_xp, spieler1_mehr_coins,
+    spieler2_level, spieler2_angriff, spieler2_krit_chance, spieler2_krit_schaden, 
+    spieler2_doppelschlag, spieler2_ausweichen, spieler2_verteidigen, 
+    spieler2_leben_pro_treffer, spieler2_max_leben, spieler2_gluck, 
+    spieler2_mehr_kampfstaub, spieler2_mehr_xp, spieler2_mehr_coins
+  ) 
+  VALUES (
+    $1, $2,
+    $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+    $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28
+  )
+  RETURNING id`,
+  [
+    s1.user_id, s2.user_id,
+    s1.level, s1.angriff, s1.krit_chance, s1.krit_schaden,
+    s1.doppelschlag, s1.ausweichen, s1.verteidigen,
+    s1.leben_pro_treffer, s1.max_leben, s1.gluck,
+    s1.mehr_kampfstaub, s1.mehr_xp, s1.mehr_coins,
+    s2.level, s2.angriff, s2.krit_chance, s2.krit_schaden,
+    s2.doppelschlag, s2.ausweichen, s2.verteidigen,
+    s2.leben_pro_treffer, s2.max_leben, s2.gluck,
+    s2.mehr_kampfstaub, s2.mehr_xp, s2.mehr_coins
+  ]
+);
+
   const kampfId = kampfInsert.rows[0].id;
 
   const protokolliere = async (aktion, schaden, kommentar, angreiferId, verteidigerId) => {
@@ -279,25 +307,25 @@ export async function simulateFight(spieler1, spieler2) {
         verteidigerId,
         aktion,
         schaden,
-        verteidigerId === s1.user_id ? s1.leben : s2.leben, // Leben des Verteidigers NACHHER
-        angreiferId === s1.user_id ? s1.leben : s2.leben,     // Leben des Angreifers NACHHER
+        Math.max(verteidigerId === s1.user_id ? s1.leben : s2.leben, 0),
+        Math.max(angreiferId === s1.user_id ? s1.leben : s2.leben, 0),
         kommentar
       ]
     );
   };
-
+  
   function randomText(category, name) {
     const list = texte[category];
     return list[Math.floor(Math.random() * list.length)].replace("{name}", name);
   }
-
+await protokolliere("anfang", 0, `Im heutigen Match stehen sich ${s1.username} und ${s2.username} gegenüber`, s1.user_id, s2.user_id);
     const angriff = async (angreifer, verteidiger) => {
 
-    const zufall200 = () => Math.floor(Math.random() * 200) + 1;
+    const zufall200 = (gluck) => (Math.floor(Math.random() * 200) + 1) - gluck;
     // Ausweichen prüfen
-    const zufall = zufall200();
-   // await protokolliere("wurf", 0, `${verteidiger.username} würfelt d100 (${zufall}) gegen Ausweichen (${verteidiger.ausweichen})`, angreifer.user_id, verteidiger.user_id);
-    if ((verteidiger.ausweichen - verteidiger.glueck) < zufall) {
+    const zufall = zufall200(verteidiger.gluck);
+   // await protokolliere("wurf", 0, `${verteidiger.username} würfelt d200 (${zufall}) gegen Ausweichen (${verteidiger.ausweichen})`, angreifer.user_id, verteidiger.user_id);
+    if ((verteidiger.ausweichen ) > zufall) {
         stats[verteidiger.user_id].ausgewichen++;
         await protokolliere("ausgewichen", 0, randomText("ausweichen", verteidiger.username), angreifer.user_id, verteidiger.user_id);
         return;
@@ -324,9 +352,9 @@ export async function simulateFight(spieler1, spieler2) {
     // Kritisch?
     let istKrit = false;
     let schaden;
-    const zufallKrit = zufall200();
+    const zufallKrit = zufall200(angreifer.gluck);
    // await protokolliere("wurf", 0, `${angreifer.username} würfelt 200 (${zufallKrit}) gegen krit. Chance (${angreifer.krit_chance})`, angreifer.user_id, verteidiger.user_id);
-    if ((angreifer.krit_chance - angreifer.glueck) < zufallKrit) {
+    if ((angreifer.krit_chance) > zufallKrit) {
       const krit_schaden = Math.floor(Math.random() * angreifer.krit_schaden) + 1;
       schaden = aWert + krit_schaden;
       istKrit = true;
@@ -359,9 +387,9 @@ export async function simulateFight(spieler1, spieler2) {
 
     // Leben pro Treffer
 
-      const zufallLpt = zufall200();
+      const zufallLpt = zufall200(angreifer.gluck);
    //  await protokolliere("wurf", 0, `${angreifer.username} würfelt (${zufallLpt}) gegen Leben pro Treffer (${angreifer.leben_pro_treffer})`, angreifer.user_id, verteidiger.user_id);
-    if ((angreifer.leben_pro_treffer - angreifer.glueck) < zufallLpt) {
+    if ((angreifer.leben_pro_treffer) > zufallLpt) {
         if (angreifer.user_id === s1.user_id) {
           s1.leben += 1;
         } else {
@@ -371,15 +399,15 @@ export async function simulateFight(spieler1, spieler2) {
       }
     
   };
-
+  
   while (s1.leben > 0 && s2.leben > 0) {
     await protokolliere("info", 0, randomText("start", s1.username), s1.user_id, s2.user_id);
     await angriff(s1, s2);
     if (s2.leben <= 0) break;
 
     if (s1.doppelschlag > 0) {
-      const zufall = Math.floor(Math.random() * 200) + 1;
-      if ((s1.doppelschlag - s1.glueck) < zufall) {
+      const zufall = (Math.floor(Math.random() * 200) + 1) - s1.gluck;
+      if ((s1.doppelschlag) > zufall) {
         stats[s1.user_id].doppelschlag_gemacht++;
         await protokolliere("doppelschlag", 0, randomText("doppelschlag", s1.username), s1.user_id, s2.user_id);
         await angriff(s1, s2);
@@ -392,8 +420,8 @@ export async function simulateFight(spieler1, spieler2) {
     if (s1.leben <= 0) break;
 
     if (s2.doppelschlag > 0) {
-      const zufall = Math.floor(Math.random() * 200) + 1;
-      if ((s2.doppelschlag - s2.glueck) < zufall) {
+      const zufall = (Math.floor(Math.random() * 200) + 1) - s2.gluck;
+      if ((s2.doppelschlag) > zufall) {
         stats[s2.user_id].doppelschlag_gemacht++;
         await protokolliere("doppelschlag", 0, randomText("doppelschlag", s2.username), s2.user_id, s1.user_id);
         await angriff(s2, s1);

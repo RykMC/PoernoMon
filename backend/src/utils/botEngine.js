@@ -87,11 +87,11 @@ async function equipItem(token, itemId, typ) {
 
 async function moveToShop(token, itemId) {
   try {
-    await api.post(`/items/${itemId}/sell`,
+   const res = await api.post(`/items/${itemId}/destroy`,
       { preis: 300 },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log(`💰 Item ${itemId} in den Shop gestellt`);
+    console.log(res.data.message);
   } catch (err) {
     console.error(`❌ Fehler beim Verkaufen von Item ${itemId}:`, err.response?.data || err);
   }
@@ -166,11 +166,33 @@ async function maybeChangeDesign(token) {
   }
 }
 
+async function cleanUpBotMessages(token) {
+  try {
+    const res = await api.get("/nachrichten", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const nachrichten = res.data;
+    
+    for (let n of nachrichten) {
+      await api.delete(`/nachrichten/${n.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log(`🗑️ Nachricht ${n.id} gelöscht`);
+    }
+
+    if (nachrichten.length > 0) {
+      console.log(`✉️ Bot hatte ${nachrichten.length} Nachrichten, alle gelöscht.`);
+    }
+
+  } catch (err) {
+    console.error("❌ Fehler beim Nachrichten-Cleanup:", err.response?.data || err);
+  }
+}
 
 
 async function createNewBot() {
   const email = getUniqueBotEmail();
-  const password = "test";
+  const password = process.env.BOT_LOGIN_PASSWORD;
 
   try {
     await api.post("/auth/register", { email, password });
@@ -235,7 +257,7 @@ async function craftBot(token, kampfstaub) {
 
 async function runBot() {
   const email = await getRandomBotEmail();
-  const token = await loginBot(email, "test");
+  const token = await loginBot(email, process.env.BOT_LOGIN_PASSWORD);
   if (!token) return;
 
   const spieler = await getSpieler(token);
@@ -254,6 +276,7 @@ async function runBot() {
   await fightBot(token, spieler.leben);
   await craftBot(token, spieler.kampfstaub);
   await maybeChangeDesign(token);
+  await cleanUpBotMessages(token);
 
 }
 
