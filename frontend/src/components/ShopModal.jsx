@@ -21,6 +21,7 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
       setLoading(true);
       const res = await api.get("/shop");
       setItems(res.data);
+      console.log(res.data);
     } catch (err) {
       console.error("Fehler beim Laden des Shops:", err);
     } finally {
@@ -89,7 +90,7 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
       ) : (
         <div>
           <div className="flex flex-wrap gap-2 justify-center mb-6">
-            {["Alle", "waffe", "kopfschutz", "brustschutz", "beinschutz", "trank"].map(typ => (
+            {["Alle", "waffe", "kopfschutz", "brustschutz", "beinschutz", "anderes"].map(typ => (
               <button
                 key={typ}
                 onClick={() => setFilter(typ)}
