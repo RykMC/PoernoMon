@@ -22,6 +22,8 @@ const jwtSecret = process.env.JWT_SECRET || 'supersecret';
 
 const corsOptions = {
   origin: ["https://poernomon.onrender.com"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 };
 
@@ -50,6 +52,8 @@ app.use('/api/shop', shopRouter);
 app.use('/api/chat', chatRouter);
 
 app.use('/api/training', trainingsRouter);
+
+app.options("*", cors(corsOptions));
 
 setInterval(() => {
   console.log("heilung startet...");
