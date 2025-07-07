@@ -22,6 +22,7 @@ export default function Dashboard() {
   const { spieler, ungeleseneNachrichten, fetchSpieler, fetchNachrichten, fetchPoernomon} = useGame();
   const [consoleMessages, setConsoleMessages] = useState(["Willkommen zurück, ich bin fit und bereit für den Kampf!"]);
 
+
   
   useEffect(() => {
     const fetchData = async () => {
