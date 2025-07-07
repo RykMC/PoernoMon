@@ -35,25 +35,25 @@ app.use(express.json());
 
 app.get("/", (req, res) => res.send("PoernoMons API läuft"));
 
-app.use('/api/auth', authRouter);
+app.use('/auth', authRouter);
 
-app.use('/api/poernomon', poernomonRoutes);
+app.use('/poernomon', poernomonRoutes);
 
-app.use('/api/design', designRouter);
+app.use('/design', designRouter);
 
-app.use('/api/fight', fightRouter);
+app.use('/fight', fightRouter);
 
-app.use('/api/nachrichten', nachrichtenRouter);
+app.use('/nachrichten', nachrichtenRouter);
 
-app.use('/api/statistik', statistikRouter);
+app.use('/statistik', statistikRouter);
 
-app.use('/api/items', itemRouter);
+app.use('/items', itemRouter);
 
-app.use('/api/shop', shopRouter);
+app.use('/shop', shopRouter);
 
-app.use('/api/chat', chatRouter);
+app.use('/chat', chatRouter);
 
-app.use('/api/training', trainingsRouter);
+app.use('/training', trainingsRouter);
 
 
 

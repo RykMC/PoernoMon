@@ -1,7 +1,9 @@
 import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api/",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
 const attributes = [
@@ -61,10 +63,7 @@ async function getRandomBotEmail() {
 
 async function getSpieler(token) {
     try {
-        const res = await axios.get("http://localhost:5000/api/auth/me", {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        const res = await api.get("/auth/me", { headers: { Authorization: `Bearer ${token}` } 
         });
         return res.data.spieler;
     } catch (err) {
