@@ -29,6 +29,8 @@ const corsOptions = {
 
 const app = express();
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
 
 app.get("/", (req, res) => res.send("PoernoMons API läuft"));
@@ -53,7 +55,7 @@ app.use('/api/chat', chatRouter);
 
 app.use('/api/training', trainingsRouter);
 
-app.options("*", cors(corsOptions));
+
 
 setInterval(() => {
   console.log("heilung startet...");
@@ -69,6 +71,11 @@ setInterval(() => {
   }
 
 }, 60 * 1000);
+
+// Testroute zum Prüfen
+app.get("/api-pm/test", (req, res) => {
+  res.json({ message: "CORS läuft!" });
+});
 
 app.listen(process.env.PORT || 5000, () => {
   console.log("Server läuft auf Port", process.env.PORT || 5000);
