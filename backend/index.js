@@ -20,9 +20,13 @@ dotenv.config();
 
 const jwtSecret = process.env.JWT_SECRET || 'supersecret';
 
+const corsOptions = {
+  origin: ["https://poernomon.onrender.com"],
+  credentials: true
+};
 
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get("/", (req, res) => res.send("PoernoMons API läuft"));
