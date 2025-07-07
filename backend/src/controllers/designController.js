@@ -1,4 +1,5 @@
 import pool from '../db/db.js';
+import { validateSetDesign, validateMarkGesehen } from "../models/index.js";
 
 // Alle freigeschalteten Designs eines Users laden (Frames & Backgrounds getrennt)
 export const getUserDesigns = async (req, res) => {
@@ -24,25 +25,23 @@ export const getUserDesigns = async (req, res) => {
 };
 
 
-// Designauswahl speichern
 export const setDesign = async (req, res) => {
+  const data = validateSetDesign(req, res);
+  if (!data) return;
+  const { type, designId } = data;
   const userId = req.user.userId;
-  const { type, designId } = req.body;
-  
-  if (!["frame", "background"].includes(type)) {
-    return res.status(400).json({ error: "Ungültiger Design-Typ" });
-  }
 
   const column = type === "frame" ? "frame_id" : "background_id";
+
   try {
     await pool.query(
       `UPDATE spieler SET ${column} = $1 WHERE user_id = $2`,
       [designId, userId]
     );
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Fehler beim Speichern" });
+    return res.status(500).json({ error: "Fehler beim Speichern" });
   }
 };
 
@@ -82,28 +81,22 @@ export const getAlleErfolge = async (req, res) => {
   }
 };
 
-
-
-
 export const markErfolgGesehen = async (req, res) => {
-  const { erfolgId } = req.body;
-  const userId = req.user.userId; 
-
-  if (!erfolgId) {
-    return res.status(400).json({ error: "Erfolg ID fehlt" });
-  }
+  const data = validateMarkGesehen(req, res);
+  if (!data) return;
+  const { erfolgId } = data;
+  const userId = req.user.userId;
 
   try {
     await pool.query(
-      `UPDATE erfolge_ref
-       SET gesehen = 1 
+      `UPDATE erfolge_ref SET gesehen = 1 
        WHERE user_id = $1 AND erfolg_id = $2`,
       [userId, erfolgId]
     );
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error("Fehler beim Markieren als gesehen:", err);
-    res.status(500).json({ error: "Serverfehler beim Markieren" });
+    return res.status(500).json({ error: "Serverfehler beim Markieren" });
   }
 };

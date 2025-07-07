@@ -89,7 +89,7 @@ export async function getKaempfeStatistik(req, res) {
       SELECT 
         gegner.user_id AS gegner_user_id,
         gegner.username AS gegner_username,
-        gegner.kreatur_bild AS gegner_kreatur_bild,
+        gegner.kreatur_bild AS gegner_kreatur_bild, erstellt_am,
         df.bild AS gegner_frame_bild,
         db.bild AS gegner_background_bild,
 
@@ -106,8 +106,8 @@ export async function getKaempfeStatistik(req, res) {
       LEFT JOIN designs df ON df.id = gegner.frame_id
       LEFT JOIN designs db ON db.id = gegner.background_id
       WHERE a.user_id = $1 OR v.user_id = $1
-      GROUP BY gegner.user_id, gegner.username, gegner.kreatur_bild, df.bild, db.bild
-      ORDER BY gesamt_kaempfe DESC
+      GROUP BY gegner.user_id, gegner.username, gegner.kreatur_bild, df.bild, db.bild, erstellt_am
+      ORDER BY k.erstellt_am DESC
     `, [userId]);
     res.json(result.rows);
   } catch (err) {

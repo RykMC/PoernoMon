@@ -3,7 +3,7 @@ import api from "../api/axios";
 
 export default function ConsoleChatModal({ onClose }) {
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Verbindungsaufbau...\nVerbindung zu PoernoMon hergestellt." }
+    { from: "bot", text: "PoernoMonCommunicator: Verbindungsaufbau...\nPoernoMonCommunicator: Verbindung zu PoernoMon hergestellt." }
   ]);
   const [input, setInput] = useState("");
   const chatEndRef = useRef(null);
@@ -42,18 +42,14 @@ export default function ConsoleChatModal({ onClose }) {
 
   return (
     <div>
-      <h3 className="text-xl font-bold mb-8 text-center">PoernoMonCommunicator</h3>
+      <h2 className="text-2xl font-bold m-2">PoernoMonCommunicator</h2>
     <div 
       className="w-full max-w-4xl mx-auto 
-                 bg-[#0a0a0a] border-4 border-cyan-500 
+                 bg-[#0a0a0a] 
                  rounded-xl shadow-[0_0_30px_rgba(0,255,255,0.5)] 
                  p-6 font-mono text-green-500 flex flex-col h-[50vh] 
                  relative overflow-hidden mb-8"
-      style={{
-        backgroundImage: 'url("/images/global/console.png")',
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      }}
+    
     >
       {/* Overlay for tint */}
       <div className="absolute inset-0 bg-black/60 z-0 rounded-xl"></div>
@@ -87,7 +83,7 @@ export default function ConsoleChatModal({ onClose }) {
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSend()}
         className={`flex-grow  py-2 rounded bg-black text-green-500 
-                    outline-none focus ${input === '' ? 'input-with-cursor' : ''}`}
+                    outline-none focus w-150 ${input === '' ? 'input-with-cursor' : ''}`}
       />
       
     </div>
@@ -97,7 +93,7 @@ export default function ConsoleChatModal({ onClose }) {
      <div className="text-center mt-4 z-10 relative">
         <button
           onClick={onClose}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded 
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded cursor-pointer transform transition hover:scale-90
                      shadow hover:shadow-[0_0_10px_rgba(255,0,0,0.6)]"
         >
           Schließen

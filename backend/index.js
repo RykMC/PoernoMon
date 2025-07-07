@@ -10,10 +10,11 @@ import statistikRouter from './src/routes/statistikRouter.js';
 import itemRouter from './src/routes/itemRouter.js';
 import shopRouter from './src/routes/shopRouter.js';
 import chatRouter from './src/routes/chatRouter.js';
+import trainingsRouter from './src/routes/trainingsRouter.js';
 import runBot from './src/utils/botEngine.js'
 
 
-import { healPoernos } from "./src/utils/healingCron.js";
+import { healPoernos, checkTrainings  } from "./src/utils/cron.js";
 
 dotenv.config();
 
@@ -44,10 +45,14 @@ app.use('/api/shop', shopRouter);
 
 app.use('/api/chat', chatRouter);
 
+app.use('/api/training', trainingsRouter);
 
 setInterval(() => {
-  healPoernos();
   console.log("heilung startet...");
+  healPoernos();
+  console.log("trainingchecks startet..."); 
+  checkTrainings();
+  
 
   // 1/10 Chance, also 10%
   if (Math.random() < 0.5) {

@@ -1,4 +1,5 @@
 import pool from '../db/db.js';
+import { validateSkill } from "../models/index.js";
 
 export const getPoernomon = async (req, res) => {
   try {
@@ -92,18 +93,11 @@ export const getPoernomon = async (req, res) => {
 
 
 export const skillEigenschaft = async (req, res) => {
- const userId = req.user.userId;
-  const { eigenschaft } = req.body;
+    const data = validateSkill(req, res);
+    if (!data) return;
 
-  const erlaubteFelder = [
-    "angriff", "krit_chance", "krit_schaden", "doppelschlag", "verteidigen", "ausweichen",
-    "leben_pro_treffer", "max_leben", "gluck", "mehr_kampfstaub", "mehr_xp", "mehr_coins"
-  ];
-
-  if (!erlaubteFelder.includes(eigenschaft)) {
-    return res.status(400).json({ error: "Ungültige Eigenschaft" });
-  }
-
+    const { eigenschaft } = data;
+    const userId = req.user.userId;
   try {
     const { rows } = await pool.query("SELECT * FROM spieler WHERE user_id = $1", [userId]);
     const p = rows[0];

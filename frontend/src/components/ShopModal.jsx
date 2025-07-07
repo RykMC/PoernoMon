@@ -76,6 +76,21 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
     }
   };
 
+  const itemEigenschaftLabels = {
+    angriff: "Angriff",
+    doppelschlag: "Doppelschlag",
+    krit_chance: "krit. Chance",
+    krit_schaden: "krit. Schaden",
+    verteidigen: "Verteidigung",
+    ausweichen: "Ausweichen",
+    leben_pro_treffer: "Leben / Treffer",
+    max_leben: "max. Gesundheit",
+    gluck: "Glück",
+    mehr_xp: "XP-Sammler",
+    mehr_kampfstaub: "Staubsammler",
+    mehr_coins: "Coins-Sammler"
+  };
+
 
 
   const filteredItems = filter === "Alle"
@@ -83,7 +98,7 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
     : items.filter(item => item.typ === filter);
     return (
     <div className="w-full max-w-5xl mx-auto p-6 text-white">
-      <h2 className="text-3xl font-bold mb-6 text-center">🛒 Shop</h2>
+      <h2 className="text-2xl font-bold">Shop</h2>
 
       {loading ? (
         <Loader />
@@ -94,7 +109,7 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
               <button
                 key={typ}
                 onClick={() => setFilter(typ)}
-                className={`px-3 py-1 rounded text-xs 
+                className={`px-3 py-1 rounded text-xs cursor-pointer transform transition hover:scale-90
                             ${filter === typ ? "bg-green-600" : "bg-gray-700 hover:bg-gray-600"}`}
               >
                 {typ.charAt(0).toUpperCase() + typ.slice(1)}
@@ -118,15 +133,15 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
                       className="w-20 h-20 object-contain mx-auto mb-4"
                     />
                     <div className="text-xs space-y-1 mb-2 text-gray-300">
-                      {item.bonus1was && <div>+{item.bonus1wert} {item.bonus1was}</div>}
-                      {item.bonus2was && <div>+{item.bonus2wert} {item.bonus2was}</div>}
-                      {item.bonus3was && <div>+{item.bonus3wert} {item.bonus3was}</div>}
+                      {item.bonus1was && <div>+{item.bonus1wert} {itemEigenschaftLabels[item.bonus1was] || item.bonus1was}</div>}
+                      {item.bonus2was && <div>+{item.bonus2wert} {itemEigenschaftLabels[item.bonus2was] || item.bonus2was}</div>}
+                      {item.bonus3was && <div>+{item.bonus3wert} {itemEigenschaftLabels[item.bonus3was] || item.bonus3was}</div>}
                     </div>
                   </div>
                   <div className="text-sm text-yellow-300 mt-2 mb-2 p-1">💰 {item.preis} Coins</div>
                   <button
                     onClick={() => handleBuy(item.shop_id)}
-                    className="px-4 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
+                    className="px-4 py-1 bg-green-600  transform transition hover:scale-90 text-white rounded text-xs cursor-pointer"
                   >
                     Kaufen
                   </button>
@@ -142,7 +157,7 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
                 await fetchSpieler();
                 onClose();
               }}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Schließen
             </button>
@@ -158,13 +173,13 @@ export default function ShopModal({ onClose, addConsoleMessage  })  {
             <div className="flex justify-between mt-6">
                 <button 
                 onClick={() => setShowBuyModal(false)} 
-                className="bg-gray-600 px-4 py-2 rounded"
+                className="bg-gray-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
                 >
                 Nein, abbrechen
                 </button>
                 <button 
                 onClick={handleBuyConfirm} 
-                className="bg-green-600 px-4 py-2 rounded"
+                className="bg-green-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
                 >
                 Ja, kaufen
                 </button>

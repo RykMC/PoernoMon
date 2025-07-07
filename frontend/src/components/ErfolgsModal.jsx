@@ -64,7 +64,7 @@ export default function ErfolgeModal({ onClose }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6 text-center">Deine Erfolge</h2>
+      <h2 className="text-2xl font-bold">Deine Erfolge</h2>
       <div className="max-w-4xl mx-auto text-white p-6 rounded h-[50vh] overflow-y-auto">
 
         <div className="space-y-4">
@@ -125,7 +125,7 @@ export default function ErfolgeModal({ onClose }) {
                 fetchSpieler();
                 onClose();
               }}
-         className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">
+         className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90">
           Schließen
         </button>
       </div>

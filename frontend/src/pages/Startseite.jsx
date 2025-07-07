@@ -23,7 +23,7 @@ export default function Startseite() {
           console.error("Fehler beim Laden des PoernoMons:", err);
         }
       }, 2000);
-    }, 2000);
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -93,7 +93,7 @@ export default function Startseite() {
 
       {/* Mitte mit PoernoMon */}
       <main className="flex justify-center items-center flex-grow relative mt-60 mr-20">
-        <div className={`relative transition-opacity duration-2000 ${fade ? "opacity-100" : "opacity-0"}`}>
+        <div className={`relative transition-opacity duration-1000 ${fade ? "opacity-100" : "opacity-0"}`}>
           <img
             src={currentMon.bild}
             alt={currentMon.name}

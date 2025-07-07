@@ -136,7 +136,7 @@ if (!spieler) return <p className="text-white ">Lade Spielerdaten...</p>;
       <div className="text-center mt-6">
         <button
           onClick={onClose}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
         >
           Schließen
         </button>

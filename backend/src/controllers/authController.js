@@ -1,11 +1,14 @@
 import pool from '../db/db.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { validateAuth, validateUsername } from "../models/index.js";
 
 const jwtSecret = process.env.JWT_SECRET || 'supersecret';
 
 export const register = async (req, res) => {
-  const { email, password } = req.body;
+   const data = validateAuth(req, res);
+    if (!data) return;
+    const { email, password } = data;
 
   try {
     // Existiert bereits?
@@ -15,11 +18,11 @@ export const register = async (req, res) => {
 
     // Passwort hashen
     const hashed = await bcrypt.hash(password, 10);
-
+    const datum = Math.floor(Date.now() / 1000);
     // User einfügen
     const userResult = await pool.query(
-      'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id',
-      [email, hashed]
+      'INSERT INTO users (email, password_hash, datum) VALUES ($1, $2, $3) RETURNING id',
+      [email, hashed, datum]
     );
     const userId = userResult.rows[0].id;
 
@@ -55,23 +58,42 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const data = validateAuth(req, res);
+  if (!data) return;
+  const { email, password } = data;
 
   try {
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) return res.status(400).json({ error: 'E-Mail nicht gefunden' });
+    if (result.rows.length === 0) 
+      return res.status(400).json({ error: 'E-Mail nicht gefunden oder falsches Passwort' });
 
     const user = result.rows[0];
     const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Falsches Passwort' });
-
+    if (!valid) 
+      return res.status(401).json({ error: 'E-Mail nicht gefunden oder falsches Passwort' });
+    
+    const datum = Math.floor(Date.now() / 1000);
     const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '7d' });
-    res.json({ token });
+
+    // Statistik-Update: logins +1, last_login2 = last_login1, last_login1 = jetzt
+    await pool.query(`
+      UPDATE spieler
+      SET 
+        logins = logins + 1,
+        last_login2 = last_login1,
+        last_login1 = $1
+      WHERE user_id = $2
+    `, [datum, user.id]);
+
+    return res.json({ token });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Login fehlgeschlagen' });
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Login fehlgeschlagen' });
+    }
   }
 };
+
 
 
 export const getMe = async (req, res) => {
@@ -104,25 +126,19 @@ export const getMe = async (req, res) => {
 };
 
 
-export const setUsername = async (req, res) => {
-  const { username } = req.body;
-  const userId = req.user.userId;
-
-  if (!username || username.length < 3) {
-    return res.status(400).json({ error: "Name zu kurz" });
-  }
+export async function setUsername(req, res) {
+  const data = validateUsername(req, res);
+  if (!data) return;
+  const { username } = data;
 
   try {
-    await pool.query(
-      "UPDATE spieler SET username = $1 WHERE user_id = $2",
-      [username, userId]
-    );
-    res.json({ success: true });
+    await pool.query("UPDATE spieler SET username = $1 WHERE user_id = $2", [username, req.user.userId]);
+    return res.json({ message: "Username gesetzt." });
   } catch (err) {
-    console.error("Fehler beim Setzen des Namens:", err);
-    res.status(500).json({ error: "Fehler beim Speichern" });
+    console.error("Username Fehler:", err);
+    return res.status(500).json({ error: "Serverfehler." });
   }
-};
+}
 
 
 

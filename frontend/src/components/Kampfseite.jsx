@@ -27,6 +27,7 @@ export default function Kampfseite() {
   const [gewinnerId, setGewinnerId] = useState(location.state?.gewinnerId || null);
 
   const logRef = useRef(null);
+  const [introStage, setIntroStage] = useState("start");
 
   const rarityClass = (seltenheit) => {
     switch (seltenheit) {
@@ -38,6 +39,19 @@ export default function Kampfseite() {
         return "border-gray-600 border-2";
     }
   };
+
+  useEffect(() => {
+    // nur starten wenn Spieler geladen
+    if (spieler1 && spieler2) {
+      setTimeout(() => setIntroStage("playerIn"), 1000);
+      setTimeout(() => setIntroStage("vs"), 2000);
+      setTimeout(() => setIntroStage("enemyIn"), 2500);
+      setTimeout(() => setIntroStage("moveToFight"), 5000);
+      setTimeout(() => setIntroStage("arena"), 6000);
+      setTimeout(() => setIntroStage("fight"), 7000);
+    }
+  }, [spieler1, spieler2]);
+
 
   useEffect(() => {
     if (location.state) {
@@ -68,6 +82,7 @@ export default function Kampfseite() {
   }, [kampfId]);
 
   useEffect(() => {
+    if (introStage !== "fight") return;
     if (kampfverlauf.length > 0 && spieler1 && spieler2) {
       if (index > 0 && index <= kampfverlauf.length) {
         const aktuellerEintrag = kampfverlauf[index - 1];
@@ -111,7 +126,7 @@ export default function Kampfseite() {
     }, 1500);
     return () => clearTimeout(timeout);
   }
-  }, [index, kampfverlauf]);
+  }, [index, kampfverlauf, introStage]);
 
   useEffect(() => {
   if (logRef.current) {
@@ -164,7 +179,49 @@ useEffect(() => {
         backgroundImage: `url("/images/global/bgkampf.png")`
       }}
     >
-      <h1 className="text-3xl font-bold mb-6">⚔️ Kampf</h1>
+      
+      <h1 className="text-3xl font-bold mb-6">⚔️ Kampf</h1>   
+      {introStage !== "fight" && (
+        <div className="absolute inset-0 bg-black z-50 flex items-center justify-center overflow-hidden">
+          {/* Spieler1 */}
+         <div 
+          className={`absolute flex flex-col items-center transition-all duration-700
+            ${introStage === "playerIn" ? "left-150 scale-[2]"
+            : introStage === "vs" ? "left-150 scale-[2]"
+            : introStage === "enemyIn" ? "left-150 scale-[2]"
+            : (introStage === "moveToFight" || introStage === "arena" || introStage === "fight") ? "left-1/4 scale-100"
+            : "-left-1/2 scale-100"}`}
+        >
+          <img src={`/${spieler1?.bild}`} className="w-50 h-50 object-contain" />
+          <h2 className="text-lg font-bold text-white mt-2">{spieler1?.name}</h2>
+        </div>
+
+          {/* Gegner */}
+          <div 
+            className={`absolute flex flex-col items-center transition-all duration-700
+              ${introStage === "enemyIn" ? "right-150 scale-[2]"
+              : (introStage === "moveToFight" || introStage === "arena" || introStage === "fight") ? "right-1/4 scale-100"
+              : "-right-1/2 scale-100"}`}
+          >
+            <img src={`/${spieler2?.bild}`} className="w-50 h-50 object-contain" />
+            <h2 className="text-lg font-bold text-white mt-2">{spieler2?.name}</h2>
+          </div>
+
+
+          {/* VS */}
+         {(introStage === "vs" || introStage === "moveToFight"  || introStage === "enemyIn") && (
+            <img src="/images/global/vs.png" className="w-32 h-32 object-contain animate-bounce z-50"/>
+          )}
+
+          {/* Arena */}
+          {introStage === "arena" && (
+            <img src="/images/global/bgkampf.png" className="absolute inset-0 w-full h-full object-cover animate-fadeIn" />
+          )}
+        </div>
+      )}
+
+
+    {introStage === "fight" && (
       <div className="flex justify-between w-full max-w-6xl">
 
 
@@ -316,6 +373,7 @@ useEffect(() => {
           </div>
         </div>
       </div>
+)}
     </div>
   );
 }

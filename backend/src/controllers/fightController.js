@@ -23,6 +23,18 @@ export const matchmaking = async (req, res) => {
     const gegner = gegnerRows[0];
     if (!gegner) return res.status(404).json({ error: "Kein passender Gegner gefunden" });
 
+    await pool.query(
+      `UPDATE training SET aktiv = 0, endzeit = startzeit + (endzeit - startzeit)
+      WHERE user_id = $1 AND aktiv = 1`,
+      [userId]
+    );
+
+    await pool.query(
+      `UPDATE training SET aktiv = 0, endzeit = startzeit + (endzeit - startzeit)
+      WHERE user_id = $1 AND aktiv = 1`,
+      [gegner.user_id]
+    );
+
     // 3. Kampf starten + speichern
     const result  = await simulateFight (player, gegner);
     res.json(result);

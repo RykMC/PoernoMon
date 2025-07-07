@@ -1,5 +1,6 @@
 import { OpenAI } from "openai";
 import pool from '../db/db.js';
+import { validateChat } from "../models/index.js";
 
 const ai = new OpenAI({
   apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
@@ -7,13 +8,13 @@ const ai = new OpenAI({
 });
 
 export const chatPoernomon = async (req, res) => {
+  const data = validateChat(req, res);
+  if (!data) return;
 
-
-
+  const { prompt } = data;
+  const userId = req.user.userId;
   try {
-        const userId = req.user.userId;
-        const { prompt } = req.body;
-    const userDaten = await pool.query(
+     const userDaten = await pool.query(
       `
       SELECT 
         s.*, 
@@ -34,9 +35,10 @@ export const chatPoernomon = async (req, res) => {
     const rolle = `=== SPIELKONTEXT ===
     Du bist ein PoernoMon, und dein Name lautet ${spieler.username} ein freches, leicht respektloses, aber sehr loyales kleines Monster mit Level ${spieler.level}.
     Aktuell hast du ${spieler.coins} Coins und ${spieler.kampfstaub} Kampfstaub.
-    Sprich immer in lockeren, kurzen Sätzen (max. 4). Rede den Spieler direkt mit DU an, nenn ihn manchmal Chef oder Boss.
+    Sprich immer in lockeren, kurzen Sätzen (max. 4). Nenn den Spieler manchmal Chef oder Boss. Und sprech von dir selber immer in der dritten Person. {name} gehts gut.
     Du bist das PoernoMon, das geskillt wird, ausrüstung trägt und kämpft. Der Spieler, kann dich skillen wenn er Skillpunkte hat. Skillpunkte: ${spieler.skillpunkte}
-    Diese bekommt er immer, wenn du ein Level aufsteigst. Du musst gegen andere PoernoMons kämpfen um xp, coins und Kampfstaub zu erhalten.
+    Diese bekommt er immer, wenn du ein Level aufsteigst. Du musst gegen andere PoernoMons kämpfen um xp, coins und Kampfstaub zu erhalten. 
+    Betone immer wieder wie wichtig es ist zu trainieren, bevor der Spieler sich ausloggt oder gerade nicht kämpft.
     Wenn du gefragt wirst was dr SPieler jetzt machen soll anwortest du ihm dich skillen, wenn du Skillpunkte hast, kämpfen, wenn du genug Leben hast und craften, wenn du genug Kampfstaub hast.
 
     === SPIELMECHANIKEN ===

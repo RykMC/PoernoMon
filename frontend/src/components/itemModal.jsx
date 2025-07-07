@@ -173,10 +173,26 @@ const startCraftingWithAnimation = () => {
     }
   };
 
+    const itemEigenschaftLabels = {
+      angriff: "Angriff",
+      doppelschlag: "Doppelschlag",
+      krit_chance: "krit. Chance",
+      krit_schaden: "krit. Schaden",
+      verteidigen: "Verteidigung",
+      ausweichen: "Ausweichen",
+      leben_pro_treffer: "Leben / Treffer",
+      max_leben: "max. Gesundheit",
+      gluck: "Glück",
+      mehr_xp: "XP-Sammler",
+      mehr_kampfstaub: "Staubsammler",
+      mehr_coins: "Coins-Sammler"
+    };
+
+
   return (
     <div>
-    <div className="w-full max-w-5xl mx-auto p-6 text-white h-130 overflow-y-auto">
-      <h2 className="text-3xl font-bold mb-6 text-center">⚒️ Crafting & Ausrüstung</h2>
+    <div className="w-full max-w-5xl mx-auto p-6 text-white h-140 overflow-y-auto">
+      <h2 className="text-2xl font-bold">Ausrüstung</h2>
 
       <div className="bg-gray-800/50 p-6 rounded-xl mb-8 text-center ">
         <button
@@ -185,7 +201,7 @@ const startCraftingWithAnimation = () => {
           className={`px-6 py-2 rounded text-lg font-bold shadow ${
             crafting || (spieler && spieler.kampfstaub < 500)
               ? "bg-gray-500 cursor-not-allowed"
-              : "bg-yellow-500 hover:bg-yellow-400 text-black"
+              : "bg-yellow-500 hover:bg-yellow-400 text-black cursor-pointer"
           }`}
         >
           {crafting ? "Crafting..." : "zufälliges Item craften"}
@@ -215,18 +231,18 @@ const startCraftingWithAnimation = () => {
     return (
       <div key={item.id} className="flex flex-col items-center">
        <div
-          className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center transform transition hover:scale-105
+          className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center 
             shadow-xl ${item ? `${style.bg} ${style.border} ${style.shadow}` : ""}`
           }
         >
           <div className="relative w-full flex flex-col items-center text-center">
             {(item.angelegt == 1 || item.angelegt === "1") && (
-              <div className="absolute top-2 -right-8 bg-green-600 text-xs px-6 py-1 rounded shadow transform rotate-24 origin-top-right z-10">
+              <div className="absolute top-2 -right-8 bg-green-600 text-xs px-6 py-1 w-28 rounded shadow transform rotate-24 origin-top-right z-10">
                 Angelegt
               </div>
             )}
             {(item.im_shop == 1 || item.im_shop === "1") && (
-              <div className="absolute -top-6 -right-8 bg-red-600 text-xs px-6 py-1 rounded shadow transform rotate-24 origin-top-left z-10">
+              <div className="absolute -top-10 -right-12 bg-red-600 text-xs px-6 py-1 w-30 rounded shadow transform rotate-24 origin-top-left z-10">
                 Im Shop
               </div>
             )}
@@ -240,9 +256,9 @@ const startCraftingWithAnimation = () => {
           </div>
 
           <div className="text-xs space-y-1 mb-2 text-gray-300">
-            {item.bonus1was && <div>+{item.bonus1wert} {item.bonus1was}</div>}
-            {item.bonus2was && <div>+{item.bonus2wert} {item.bonus2was}</div>}
-            {item.bonus3was && <div>+{item.bonus3wert} {item.bonus3was}</div>}
+            {item.bonus1was && <div>+{item.bonus1wert} {itemEigenschaftLabels[item.bonus1was] || item.bonus1was}</div>}
+            {item.bonus2was && <div>+{item.bonus2wert} {itemEigenschaftLabels[item.bonus2was] || item.bonus2was}</div>}
+            {item.bonus3was && <div>+{item.bonus3wert} {itemEigenschaftLabels[item.bonus3was] || item.bonus3was}</div>}
           </div>
             </div>
             <div className="m-2">
@@ -250,7 +266,7 @@ const startCraftingWithAnimation = () => {
             <div className="flex flex-wrap gap-2 mt-auto">
               <button 
                 onClick={() => handleUnsell(item.id)} 
-                className="px-2 py-1 bg-yellow-700 rounded text-xs"
+                className="px-2 py-1 bg-yellow-700 rounded text-xs cursor-pointer transform transition hover:scale-90"
               >
                 Vom Shop nehmen
               </button>
@@ -259,7 +275,7 @@ const startCraftingWithAnimation = () => {
             <div className="flex flex-wrap gap-2 mt-auto">
               <button 
                 onClick={() => handleUsePotion(item.id)} 
-                className="px-2 py-1 bg-green-600 rounded text-xs"
+                className="px-2 py-1 bg-green-600 rounded text-xs cursor-pointer transform transition hover:scale-90"
               >
                 Benutzen
               </button>
@@ -268,13 +284,13 @@ const startCraftingWithAnimation = () => {
             <div className="flex flex-wrap gap-2 mt-auto">
               <button 
                 onClick={() => handleDestroy(item.id)} 
-                className="px-1 py-1 bg-red-600 rounded text-xs"
+                className="px-1 py-1 bg-red-600 rounded text-xs cursor-pointer transform transition hover:scale-90"
               >
                 Vernichten
               </button>
               <button 
                 onClick={() => handleSell(item.id)} 
-                className="px-1 py-1 bg-yellow-600 rounded text-xs"
+                className="px-1 py-1 bg-yellow-600 rounded text-xs cursor-pointer transform transition hover:scale-90"
               >
                 Verkaufen
               </button>
@@ -296,8 +312,9 @@ const startCraftingWithAnimation = () => {
           onClick={async () => {
             await fetchItems();
             onClose();
+            fetchPoernomon();
           }}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
         >
           Schließen
         </button>
@@ -315,8 +332,8 @@ const startCraftingWithAnimation = () => {
               min="1"
             />
             <div className="flex justify-between">
-              <button onClick={() => setShowSellModal(false)} className="bg-gray-600 px-4 py-2 rounded">Abbrechen</button>
-              <button onClick={handleSellConfirm} className="bg-green-600 px-4 py-2 rounded">Verkaufen</button>
+              <button onClick={() => setShowSellModal(false)} className="bg-gray-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90">Abbrechen</button>
+              <button onClick={handleSellConfirm} className="bg-green-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90">Verkaufen</button>
             </div>
           </div>
         </div>
@@ -328,13 +345,13 @@ const startCraftingWithAnimation = () => {
           <div className="flex justify-between mt-6">
             <button 
               onClick={() => setShowDestroyModal(false)} 
-              className="bg-gray-600 px-4 py-2 rounded"
+              className="bg-gray-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Nein, behalten
             </button>
             <button 
               onClick={handleDestroyConfirm} 
-              className="bg-red-600 px-4 py-2 rounded"
+              className="bg-red-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Ja, vernichten
             </button>
@@ -349,13 +366,13 @@ const startCraftingWithAnimation = () => {
           <div className="flex justify-between mt-6">
             <button 
               onClick={() => setShowUnsellModal(false)} 
-              className="bg-gray-600 px-4 py-2 rounded"
+              className="bg-gray-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Nein, lassen
             </button>
             <button 
               onClick={handleUnsellConfirm} 
-              className="bg-yellow-600 px-4 py-2 rounded"
+              className="bg-yellow-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Ja, rausnehmen
             </button>
@@ -370,13 +387,13 @@ const startCraftingWithAnimation = () => {
           <div className="flex justify-between mt-6">
             <button 
               onClick={() => setShowUsePotionModal(false)} 
-              className="bg-gray-600 px-4 py-2 rounded"
+              className="bg-gray-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Nein, abbrechen
             </button>
             <button 
               onClick={handleUsePotionConfirm} 
-              className="bg-green-600 px-4 py-2 rounded"
+              className="bg-green-600 px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
               Ja, benutzen
             </button>

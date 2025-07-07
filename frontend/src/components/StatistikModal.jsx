@@ -54,7 +54,7 @@ export default function StatistikModal({ onClose }) {
       <div className="flex flex-grow h-120">
         {/* Linke Seite: Stats */}
         <div className="w-1/2 border-r border-white/20 overflow-y-auto pr-6">
-          <h3 className="text-xl font-bold mb-4">📊 Deine Statistiken</h3>
+          <h2 className="text-xl font-bold mb-4">📊 Deine Statistiken</h2>
           {loadingStats ? (
             <div className="flex justify-center items-center h-full"><Loader /></div>
           ) : (
@@ -124,7 +124,7 @@ export default function StatistikModal({ onClose }) {
 
         {/* Rechte Seite: Ranking */}
         <div className="w-1/2 pl-6 overflow-y-auto">
-          <h3 className="text-xl font-bold mb-4">⚔️ Deine Kämpfe</h3>
+          <h2 className="text-xl font-bold mb-4">⚔️ Deine Kämpfe</h2>
           {loadingKaempfe ? (
             <div className="flex justify-center items-center h-full"><Loader /></div>
           ) : (
@@ -218,7 +218,7 @@ export default function StatistikModal({ onClose }) {
       <div className="text-center mt-6">
         <button
           onClick={onClose}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
         >
           Schließen
         </button>

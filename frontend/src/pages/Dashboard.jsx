@@ -8,6 +8,7 @@ import ShopModal from "../components/ShopModal";
 import RankingModal from "../components/RankingModal";
 import ErfolgsModal from "../components/ErfolgsModal";
 import CommunicatorModal from "../components/CommunicatorModal";
+import TrainingsModal from "../components/TrainingsModal";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import { useGame } from "../context/GameContext";
@@ -257,24 +258,28 @@ export default function Dashboard() {
         </div>
       </div>
       <button onClick={() => { setModalContent(<ItemModal addConsoleMessage={addConsoleMessage} onClose={() => setShowModal(false)} />); setShowModal(true); }}
-              className="absolute left-[26%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+              className="absolute left-[50em] bottom-[8em] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
                 <img src="/images/global/abutton.png" className="w-[12vw] max-w-[150px]" />
         <span className="sr-only">Ausrüstung</span>
       </button>
+      <button onClick={() => { setModalContent(<TrainingsModal addConsoleMessage={addConsoleMessage} onClose={() => setShowModal(false)} />); setShowModal(true); }}
+              className="absolute left-[61em] bottom-[8em] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+                <img src="/images/global/tbutton.png" className="w-[12vw] max-w-[150px]" />
+      </button>
       <button onClick={() => { setModalContent(<ShopModal addConsoleMessage={addConsoleMessage} onClose={() => setShowModal(false)} />); setShowModal(true); }}
-              className="absolute left-[35%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+              className="absolute left-[72em] bottom-[8em] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
                 <img src="/images/global/hbutton.png" className="w-[12vw] max-w-[150px]" />
       </button>
       <button onClick={() => { setModalContent(<StatistikModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
-              className="absolute left-[46%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+              className="absolute left-[50em] bottom-[3em] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
               <img src="/images/global/sbutton.png" className="w-[12vw] max-w-[150px]" />
       </button>
       <button onClick={() => { setModalContent(<ErfolgsModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
-              className="absolute left-[55%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+              className="absolute left-[61em] bottom-[3em] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
         <img src="/images/global/ebutton.png" className="w-[12vw] max-w-[150px]" />
       </button>
       <button onClick={() => { setModalContent(<RankingModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
-              className="absolute left-[64%] bottom-[13%] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
+              className="absolute left-[72em] bottom-[3em] w-[8vw] h-[8vw] max-w-[130px] max-h-[120px] cursor-pointer transition-transform duration-200 hover:scale-90 hover:drop-shadow-[0_0_10px_rgba(0,255,255,0.7)]">
         <img src="/images/global/rbutton.png" className="w-[12vw] max-w-[150px]" />
       </button>
       
@@ -312,7 +317,7 @@ export default function Dashboard() {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto bg-gray-900 p-6 rounded-2xl shadow-2xl w-[130vh] h-[70vh] mx-4 relative">
+          <div className="pointer-events-auto bg-gray-900 p-6 w-[130vh] h-[70vh] mx-4 relative border-3 border-cyan-500 rounded-xl shadow-[0_0_30px_rgba(0,255,255,0.5)] ">
             {modalContent}
           </div>
         </div>

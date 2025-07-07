@@ -1,5 +1,6 @@
 import pool from "../db/db.js";
 import { checkErfolgeNachCraft } from "../utils/erfolge.js";
+import { validateEquip, validateSell } from "../models/index.js";
 
 export async function getItems(req, res) {
   try {
@@ -17,14 +18,12 @@ export async function getItems(req, res) {
 
 
 export async function equipItem(req, res) {
+  const data = validateEquip(req, res);
+      if (!data) return;
+      const { slot, itemId } = data;
+      const userId = req.user.userId;
   try {
-    const userId = req.user.userId;
-    const { slot, itemId } = req.body;
-
-    if (!slot) {
-      return res.status(400).json({ error: "Kein Slot angegeben" });
-    }
-
+      
     // === 1. alten Wert wieder abziehen (falls da was angelegt ist)
     const oldItemRes = await pool.query(
       `SELECT * FROM items WHERE userid = $1 AND typ = $2 AND angelegt = 1`,
@@ -107,12 +106,12 @@ export async function equipItem(req, res) {
       );
     }
 
-    res.json({ success: true, message: `Du hast ${newItem.bezeichnung} angelegt.` });
+    return res.json({ success: true, message: `Du hast ${newItem.bezeichnung} angelegt.` });
 
-  } catch (err) {
-    console.error("Fehler beim Ausrüsten:", err);
-    res.status(500).json({ error: "Serverfehler" });
-  }
+    } catch (err) {
+      console.error("Fehler beim Ausrüsten:", err);
+      return res.status(500).json({ error: "Serverfehler" });
+    }
 }
 
 const genitiveMap = {
@@ -279,14 +278,14 @@ export const destroyItem = async (req, res) => {
 
 
 export const sellItem = async (req, res) => {
-  const itemId = req.params.id;
-  const userId = req.user.userId; // JWT-Auth vorausgesetzt
-  const { preis } = req.body;
+  const data = validateSell(req, res);
 
-  if (!preis || isNaN(preis) || preis <= 0) {
-    return res.status(400).json({ error: "Ungültiger Preis" });
-  }
-
+  if (!data) return;
+  
+  const { preis } = data;
+  const itemId = Number(req.params.id);
+  const userId = req.user.userId;
+  
   try {
     // Prüfen, ob Item existiert und dem User gehört
     const itemRes = await pool.query(

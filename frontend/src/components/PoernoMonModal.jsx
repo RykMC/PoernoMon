@@ -69,8 +69,8 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
     [
       { label: "Verteidigung", key: "verteidigen", value: poernomon.eigenschaften.verteidigen, tooltip: "Reduziert gegnerischen Schaden" },
       { label: "Ausweichen", key: "ausweichen", value: poernomon.eigenschaften.ausweichen, tooltip: "Chance Angriffen komplett zu entgehen" },
-      { label: "Leben / Treffer", key: "leben_pro_treffer", value: poernomon.eigenschaften.leben_pro_treffer, tooltip: "Heilt dich nach einem Treffer" },
-      { label: "max. Leben", key: "max_leben", value: poernomon.eigenschaften.max_leben, tooltip: "Maximale Lebenspunkte" },
+      { label: "Leben / Treffer", key: "leben_pro_treffer", value: poernomon.eigenschaften.leben_pro_treffer, tooltip: "Chance auf Heilung nach Treffer" },
+      { label: "max. Gesundheit", key: "max_leben", value: poernomon.eigenschaften.max_leben, tooltip: "Maximale Lebenspunkte" },
     ],
     [
       { label: "Glück", key: "gluck", value: poernomon.eigenschaften.gluck, tooltip: "Manchmal gehört auch etwas Glück dazu" },
@@ -79,6 +79,21 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
       { label: "Coins-Sammler", key: "mehr_coins", value: poernomon.eigenschaften.mehr_coins, tooltip: "Erhöht erhaltene Coins" },
     ]
   ];
+
+  const itemEigenschaftLabels = {
+    angriff: "Angriff",
+    doppelschlag: "Doppelschlag",
+    krit_chance: "krit. Chance",
+    krit_schaden: "krit. Schaden",
+    verteidigen: "Verteidigung",
+    ausweichen: "Ausweichen",
+    leben_pro_treffer: "Leben / Treffer",
+    max_leben: "max. Gesundheit",
+    gluck: "Glück",
+    mehr_xp: "XP-Sammler",
+    mehr_kampfstaub: "Staubsammler",
+    mehr_coins: "Coins-Sammler"
+  };
 
 
   console.log(poernomon);
@@ -179,7 +194,7 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
                         {poernomon.skillpunkte > 0 && (
                           <button
                             onClick={() => handleSkill(e.key)}
-                            className="text-green-400 hover:text-green-300 font-bold cursor-pointer hover:scale-125 hover:rotate-6 transition-transform duration-100 ease-in-out animate-bounce"
+                            className="text-green-400 hover:text-green-300 font-bold cursor-pointer hover:scale-125  duration-60 ease-in-out animate-bounce"
                             title={`+1 auf ${e.label}`}
                           >
                             ＋
@@ -232,7 +247,7 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
 
                     {/* Die Card darunter */}
                     <div
-                      className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center transform transition hover:scale-105
+                      className={`w-40 md:w-46 h-56 md:h-60 rounded-2xl p-5 text-center 
                         shadow-xl ${item ? `${style.bg} ${style.border} ${style.shadow}` : ""}`
                       }
                     >
@@ -246,7 +261,7 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
                           />
                           <div className="text-xs space-y-1 mb-2 text-gray-300">
                             {item.boni.map((b, idx) => (
-                              <div key={idx}>+{b.wert} {b.was}</div>
+                              <div key={idx}>+{b.wert} {itemEigenschaftLabels[b.was] || b.was}</div>
                             ))}
                           </div>
                         </>

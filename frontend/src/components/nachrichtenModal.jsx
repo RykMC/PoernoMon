@@ -67,7 +67,7 @@ export default function NachrichtenModal({ onClose}) {
             <p className="mb-6">{ausgewaehlt.text}</p>
             <button
               onClick={() => handleDelete(ausgewaehlt.id)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded cursor-pointer"
             >
               Nachricht löschen
             </button>
@@ -84,7 +84,7 @@ export default function NachrichtenModal({ onClose}) {
                 fetchSpieler();
                 onClose();
               }}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
             >
             Schließen
             </button>

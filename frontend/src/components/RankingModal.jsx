@@ -3,7 +3,7 @@ import api from "../api/axios";
 import Loader from "./Loader";
 
 const METRICS = [
-  { label: "Kämpfe insegsamt", value: "kaempfe_insgesamt" },
+  { label: "Kämpfe insgesamt", value: "kaempfe_insgesamt" },
   { label: "Siege", value: "siege" },
   { label: "Niederlagen", value: "niederlagen" },
   { label: "Siege in Folge", value: "siege_in_folge" },
@@ -137,7 +137,7 @@ export default function StatistikModal({ onClose }) {
       <div className="text-center mt-6">
         <button
           onClick={onClose}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded cursor-pointer transform transition hover:scale-90"
         >
           Schließen
         </button>
