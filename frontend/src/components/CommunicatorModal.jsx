@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import api from "../api/axios";
+import { useGame } from "../context/GameContext";
 
 export default function ConsoleChatModal({ onClose }) {
   const [messages, setMessages] = useState([
@@ -8,12 +9,26 @@ export default function ConsoleChatModal({ onClose }) {
   const [input, setInput] = useState("");
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const { fetchSpieler, spieler } = useGame();
+
 
   const scrollToBottom = () => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  useEffect(() => {
+  (async () => {
+    try {
+      const res = await api.get("/auth/getme");
+      setMe(res.data);
+    } catch (err) {
+      console.error("Fehler beim Laden von getme:", err);
+    }
+  })();
+}, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -31,12 +46,15 @@ export default function ConsoleChatModal({ onClose }) {
     setInput("");
 
     try {
+      setLoading(true);
       const res = await api.post("/chat", { prompt: input }); // dein AI-Endpoint
       const botReply = res.data.reply || "Keine Antwort erhalten.";
       setMessages(prev => [...prev, { from: "bot", text: botReply }]);
     } catch (err) {
       console.error("Fehler beim Chat:", err);
       setMessages(prev => [...prev, { from: "bot", text: "❌ Fehler beim Antworten." }]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,19 +92,26 @@ export default function ConsoleChatModal({ onClose }) {
       </div>
 
       {/* Input */}
-    <div className="mt-4  z-10 relative">
-     c:\PoernoMonConnector\ <input
-        ref={inputRef}
-        type="text"
-        value={input}
-        placeholder=""
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        className={`flex-grow  py-2 rounded bg-black text-green-500 
-                    outline-none focus w-150 ${input === '' ? 'input-with-cursor' : ''}`}
-      />
-      
-    </div>
+      <div className="mt-4 z-10 relative">
+        {loading ? (
+          <div className="text-green-500 font-mono">
+            {spieler.username} tippt...
+          </div>
+        ) : (
+          <>
+            c:\PoernoMonConnector\ <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              placeholder=""
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              className={`flex-grow py-2 rounded bg-black text-green-500 
+                          outline-none focus w-150 ${input === '' ? 'input-with-cursor' : ''}`}
+            />
+          </>
+        )}
+      </div>
 
      
     </div>
