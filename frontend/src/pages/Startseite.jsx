@@ -14,17 +14,23 @@ export default function Startseite() {
     const interval = setInterval(() => {
       setFade(false);
       setTimeout(async () => {
-        try {
-          const res = await api.get("/auth/random");
-          setCurrentMon({ 
-            name: res.data.username, 
-            bild: "/" + res.data.kreatur_bild 
-          });
+      try {
+        const res = await api.get("/auth/random");
+        const newMon = { 
+          name: res.data.username, 
+          bild: "/" + res.data.kreatur_bild 
+        };
+        
+        const img = new Image();
+        img.src = newMon.bild;
+        img.onload = () => {
+          setCurrentMon(newMon);
           setFade(true);
-        } catch (err) {
-          console.error("Fehler beim Laden des PoernoMons:", err);
-        }
-      }, 2000);
+        };
+      } catch (err) {
+        console.error("Fehler beim Laden des PoernoMons:", err);
+      }
+    }, 2000);
     }, 10000);
     return () => clearInterval(interval);
   }, []);

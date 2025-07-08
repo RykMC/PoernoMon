@@ -63,7 +63,7 @@ export default function NachrichtenModal({ onClose}) {
         {ausgewaehlt ? (
           <>
             <h3 className="text-xl font-bold mb-2">{ausgewaehlt.betreff}</h3>
-            <p className="text-sm text-gray-400 mb-4">{new Date(ausgewaehlt.datum).toLocaleString()}</p>
+            <p className="text-sm text-gray-400 mb-4">{new Date(ausgewaehlt.datum  * 1000).toLocaleString()}</p>
             <p className="mb-6">{ausgewaehlt.text}</p>
             <button
               onClick={() => handleDelete(ausgewaehlt.id)}
