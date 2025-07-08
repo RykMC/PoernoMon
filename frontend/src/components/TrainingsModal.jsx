@@ -129,7 +129,7 @@ export default function TrainingModal({ onClose }) {
               >
                 <option value="">- Eigenschaft wählen -</option>
                 <option value="angriff">Angriff</option>
-                <option value="verteidigung">Verteidigung</option>
+                <option value="verteidigen">Verteidigung</option>
                 <option value="gesundheit">Gesundheit</option>
               </select>
               <div className="mb-2 text-center">Dauer: 24 Stunden</div>

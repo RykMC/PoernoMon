@@ -245,7 +245,7 @@ export default function Dashboard() {
           onClick={() => { setModalContent(<CommunicatorModal onClose={() => setShowModal(false)} />); setShowModal(true); }}
         >
           <img src="/images/global/bildschirm.png" alt="Konsole" className="h-[12em] w-[24em]" />
-        <div className="absolute left-13 top-3 w-[21em] h-[11em] text-green-400 p-4 font-mono text-sm overflow-y-auto">
+        <div className="absolute left-13 top-3 w-[21em] h-[11em] text-green-400 p-4 font-mono text-sm overflow-y-auto cursor-pointer">
         {consoleMessages.map((msg, index) => (
           <>
             <div className="console">

@@ -8,6 +8,7 @@ export default function Startseite() {
   const [currentMon, setCurrentMon] = useState({ name: "", bild: "" });
   const [fade, setFade] = useState(true);
   const [message, setMessage] = useState("");
+  const [rotation, setRotation] = useState(0);
 
 
   useEffect(() => {
@@ -24,9 +25,13 @@ export default function Startseite() {
         const img = new Image();
         img.src = newMon.bild;
         img.onload = () => {
-          setCurrentMon(newMon);
-          setFade(true);
-        };
+        setCurrentMon(newMon);
+        const angle = Math.random() < 0.5 
+          ? Math.floor(Math.random() * 10) 
+          : 350 + Math.floor(Math.random() * 10);
+        setRotation(angle);
+        setFade(true);
+      };
       } catch (err) {
         console.error("Fehler beim Laden des PoernoMons:", err);
       }
@@ -113,7 +118,10 @@ export default function Startseite() {
             alt={currentMon.name}
             className="w-[500px] mx-auto"
           />
-          <div className="absolute bottom-48 left-38 w-50 bg-black/60 py-2 text-center">
+          <div 
+            className="absolute bottom-48 left-38 w-50 bg-black/60 py-2 text-center"
+            style={{ transform: `rotate(${rotation}deg)` }}
+          >
             <h2 className="text-2xl text-white font-bold">{currentMon.name}</h2>
           </div>
         </div>
