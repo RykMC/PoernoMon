@@ -7,6 +7,8 @@ export default function Startseite() {
   const [mode, setMode] = useState("login");
   const [currentMon, setCurrentMon] = useState({ name: "", bild: "" });
   const [fade, setFade] = useState(true);
+  const [message, setMessage] = useState("");
+
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,6 +31,7 @@ export default function Startseite() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
+    setMessage("");
     try {
       if (mode === "login") {
         const res = await api.post("/auth/login", { email, password });
@@ -37,10 +40,10 @@ export default function Startseite() {
       } else {
         const res = await api.post("/auth/register", { email, password });
         localStorage.setItem("token", res.data.token);
-        alert("Registrierung erfolgreich!");
+        setMessage("✅ Registrierung erfolgreich! Du kannst dich jetzt einloggen.");
       }
     } catch (err) {
-      alert(err.response?.data?.error || "Fehler beim Auth");
+      setMessage(err.response?.data?.error || "Fehler beim Auth");
     }
   };
 
@@ -90,6 +93,11 @@ export default function Startseite() {
           </button>
         </form>
       </header>
+      {message && (
+        <div className="mt-2 px-4 py-2 bg-black/60 text-white rounded text-center">
+          {message}
+        </div>
+      )}
 
       {/* Mitte mit PoernoMon */}
       <main className="flex justify-center items-center flex-grow relative mt-60 mr-20">
@@ -109,6 +117,7 @@ export default function Startseite() {
       <footer className="text-white text-center p-4 bg-black/60 text-sm">
         © 2025 PoernoMons
       </footer>
+      
     </div>
   );
 }

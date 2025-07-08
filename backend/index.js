@@ -21,7 +21,7 @@ dotenv.config();
 const jwtSecret = process.env.JWT_SECRET || 'supersecret';
 
 const corsOptions = {
-  origin: ["https://poernomon.onrender.com"],
+  origin: ["https://poernomon.onrender.com", "http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -29,7 +29,7 @@ const corsOptions = {
 
 const app = express();
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+//app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
