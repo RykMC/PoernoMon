@@ -188,6 +188,39 @@ async function cleanUpBotMessages(token) {
   }
 }
 
+async function handleTraining(token) {
+  try {
+    const res = await api.get("/training", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const training = res.data.training[0];
+
+    if (training) {
+      console.log("Training:", training.aktiv, training.eigenschaft);
+      if (training.aktiv === 0) {
+        // wieder aufnehmen
+        await api.post("/training/start", { eigenschaft: training.eigenschaft }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log(`▶️ Training in ${training.eigenschaft} wieder aufgenommen.`);
+      } else {
+        console.log(`🚀 Training läuft bereits in ${training.eigenschaft}.`);
+      }
+    } else {
+      // neues Training starten
+      const eigenschaften = ["angriff", "verteidigen", "gesundheit"];
+      const eigenschaft = eigenschaften[Math.floor(Math.random() * eigenschaften.length)];
+      await api.post("/training/start", { eigenschaft } , {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log(`🏋️ Neues Training gestartet in ${eigenschaft}.`);
+    }
+
+  } catch (err) {
+    console.error("❌ Fehler beim Training:", err.response?.data || err);
+  }
+}
+
 
 async function createNewBot() {
   const email = getUniqueBotEmail();
@@ -276,6 +309,7 @@ async function runBot() {
   await craftBot(token, spieler.kampfstaub);
   await maybeChangeDesign(token);
   await cleanUpBotMessages(token);
+  await handleTraining(token);
 
 }
 
