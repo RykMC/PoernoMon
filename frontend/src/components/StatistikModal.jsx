@@ -170,40 +170,76 @@ export default function StatistikModal({ onClose }) {
           </div>
         </>
       ) : (
-        <>
-          {/* Gegner links */}
-          <div className="relative w-[100px] h-[100px] flex-shrink-0">
-            {kampf.gegner_background_bild && (
-              <img src={`/${kampf.gegner_background_bild}`} className="absolute w-full h-full" alt="bg"/>
-            )}
-            <img src={`/${kampf.gegner_kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
-            {kampf.gegner_frame_bild && (
-              <img src={`/${kampf.gegner_frame_bild}`} className="absolute w-full h-full" alt="frame"/>
-            )}
-          </div>
+       <>
+  {kampf.spieler1_id === spieler.user_id ? (
+    <>
+      {/* Dein Bild links */}
+      <div className="relative w-[100px] h-[100px] flex-shrink-0">
+        {poernomon.background_bild && (
+          <img src={`/${poernomon.background_bild}`} className="absolute w-full h-full" alt="bg"/>
+        )}
+        <img src={`/${poernomon.kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+        {poernomon.frame_bild && (
+          <img src={`/${poernomon.frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+        )}
+      </div>
 
-          {/* Text */}
-          <div className="flex flex-col justify-center text-sm flex-grow">
-            <div>
-              <span className="font-bold">{kampf.gegner_username}</span> hat dich insgesamt <span className="font-bold">{kampf.gesamt_kaempfe - kampf.angriffe_von_dir}</span>x angegriffen.
-            </div>
-            <div className="text-gray-400">
-              Ihr habt insgesamt <span className="font-bold">{kampf.gesamt_kaempfe}</span>x gekämpft,
-              du hast <span className="font-bold">{kampf.siege_von_dir}</span>x gewonnen.
-            </div>
-          </div>
+      {/* Text */}
+      <div className="flex flex-col justify-center text-sm flex-grow">
+        <div>
+          Ihr habt insgesamt <span className="font-bold">{kampf.gesamt_kaempfe}</span>x gekämpft,
+          du hast <span className="font-bold">{kampf.ich_hab_ihn_angegriffen}</span>x angegriffen,
+          und insgesamt <span className="font-bold">{kampf.gesamt_gewonnen}</span>x gewonnen.
+        </div>
+      </div>
 
-          {/* Dein Bild rechts */}
-          <div className="relative w-[100px] h-[100px] flex-shrink-0">
-            {poernomon.background_bild && (
-              <img src={`/${poernomon.background_bild}`} className="absolute w-full h-full" alt="bg"/>
-            )}
-            <img src={`/${poernomon.kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
-            {poernomon.frame_bild && (
-              <img src={`/${poernomon.frame_bild}`} className="absolute w-full h-full" alt="frame"/>
-            )}
-          </div>
-        </>
+      {/* Gegner rechts */}
+      <div className="relative w-[100px] h-[100px] flex-shrink-0">
+        {kampf.gegner_background_bild && (
+          <img src={`/${kampf.gegner_background_bild}`} className="absolute w-full h-full" alt="bg"/>
+        )}
+        <img src={`/${kampf.gegner_kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+        {kampf.gegner_frame_bild && (
+          <img src={`/${kampf.gegner_frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+        )}
+      </div>
+    </>
+  ) : (
+    <>
+      {/* Gegner links */}
+      <div className="relative w-[100px] h-[100px] flex-shrink-0">
+        {kampf.gegner_background_bild && (
+          <img src={`/${kampf.gegner_background_bild}`} className="absolute w-full h-full" alt="bg"/>
+        )}
+        <img src={`/${kampf.gegner_kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+        {kampf.gegner_frame_bild && (
+          <img src={`/${kampf.gegner_frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+        )}
+      </div>
+
+      {/* Text */}
+      <div className="flex flex-col justify-center text-sm flex-grow">
+        <div>
+          Ihr habt insgesamt <span className="font-bold">{kampf.gesamt_kaempfe}</span>x gekämpft,
+          er hat dich <span className="font-bold">{kampf.er_hat_mich_angegriffen}</span>x angegriffen,
+          und du hast insgesamt <span className="font-bold">{kampf.gesamt_gewonnen}</span>x gewonnen.
+        </div>
+      </div>
+
+      {/* Dein Bild rechts */}
+      <div className="relative w-[100px] h-[100px] flex-shrink-0">
+        {poernomon.background_bild && (
+          <img src={`/${poernomon.background_bild}`} className="absolute w-full h-full" alt="bg"/>
+        )}
+        <img src={`/${poernomon.kreatur_bild}`} className="absolute w-full h-full" alt="kreatur"/>
+        {poernomon.frame_bild && (
+          <img src={`/${poernomon.frame_bild}`} className="absolute w-full h-full" alt="frame"/>
+        )}
+      </div>
+    </>
+  )}
+</>
+
       )}
     </div>
   );

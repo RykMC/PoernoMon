@@ -86,34 +86,66 @@ export async function getKaempfeStatistik(req, res) {
     const userId = req.user.userId;
 
     const result = await pool.query(`
-      SELECT 
-        gegner.user_id AS gegner_user_id,
-        gegner.username AS gegner_username,
-        gegner.kreatur_bild AS gegner_kreatur_bild, erstellt_am,
-        df.bild AS gegner_frame_bild,
-        db.bild AS gegner_background_bild,
+      SELECT
+  k.id AS kampf_id,
+  k.erstellt_am,
+  k.spieler1_id,
+  k.spieler2_id,
+  k.gewinner_id,
 
-        COUNT(*) AS gesamt_kaempfe,
-        SUM(CASE WHEN k.spieler1_id = $1 THEN 1 ELSE 0 END) AS angriffe_von_dir,
-        SUM(CASE WHEN k.gewinner_id = $1 THEN 1 ELSE 0 END) AS siege_von_dir
+  -- Dein Poernomon
+  du.user_id AS mein_user_id,
+  du.kreatur_bild AS mein_kreatur_bild,
+  duf.bild AS mein_frame_bild,
+  dub.bild AS mein_background_bild,
 
-      FROM kaempfe k
-      JOIN spieler a ON a.user_id = k.spieler1_id
-      JOIN spieler v ON v.user_id = k.spieler2_id
-      JOIN spieler gegner ON
-           (a.user_id = $1 AND v.user_id != $1 AND gegner.user_id = v.user_id)
-        OR (v.user_id = $1 AND a.user_id != $1 AND gegner.user_id = a.user_id)
-      LEFT JOIN designs df ON df.id = gegner.frame_id
-      LEFT JOIN designs db ON db.id = gegner.background_id
-      WHERE a.user_id = $1 OR v.user_id = $1
-      GROUP BY gegner.user_id, gegner.username, gegner.kreatur_bild, df.bild, db.bild, erstellt_am
-      ORDER BY k.erstellt_am DESC
+  -- Gegner
+  gegner.user_id AS gegner_user_id,
+  gegner.username AS gegner_username,
+  gegner.kreatur_bild AS gegner_kreatur_bild,
+  df.bild AS gegner_frame_bild,
+  db.bild AS gegner_background_bild,
+
+  -- Gesamtstatistik
+  (SELECT COUNT(*) FROM kaempfe 
+    WHERE (spieler1_id = $1 AND spieler2_id = gegner.user_id)
+       OR (spieler2_id = $1 AND spieler1_id = gegner.user_id)
+  ) AS gesamt_kaempfe,
+
+  (SELECT COUNT(*) FROM kaempfe 
+    WHERE spieler1_id = $1 AND spieler2_id = gegner.user_id
+  ) AS ich_hab_ihn_angegriffen,
+
+  (SELECT COUNT(*) FROM kaempfe 
+    WHERE spieler2_id = $1 AND spieler1_id = gegner.user_id
+  ) AS er_hat_mich_angegriffen,
+
+  (SELECT COUNT(*) FROM kaempfe 
+    WHERE ((spieler1_id = $1 AND spieler2_id = gegner.user_id)
+        OR (spieler2_id = $1 AND spieler1_id = gegner.user_id))
+      AND gewinner_id = $1
+  ) AS gesamt_gewonnen
+
+FROM kaempfe k
+JOIN spieler du ON du.user_id = $1
+JOIN designs duf ON duf.id = du.frame_id
+JOIN designs dub ON dub.id = du.background_id
+
+JOIN spieler gegner 
+  ON (k.spieler1_id = $1 AND gegner.user_id = k.spieler2_id)
+   OR (k.spieler2_id = $1 AND gegner.user_id = k.spieler1_id)
+LEFT JOIN designs df ON df.id = gegner.frame_id
+LEFT JOIN designs db ON db.id = gegner.background_id
+WHERE k.spieler1_id = $1 OR k.spieler2_id = $1
+ORDER BY k.erstellt_am DESC
+
+
     `, [userId]);
+
     res.json(result.rows);
   } catch (err) {
     console.error("Fehler beim Laden der Kampf-Statistik:", err);
     res.status(500).json({ error: "Interner Serverfehler" });
   }
 }
-
 
