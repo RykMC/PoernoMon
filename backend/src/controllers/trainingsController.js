@@ -1,6 +1,7 @@
 import pool from '../db/db.js';
 import { validateStartTraining } from "../models/index.js";
 
+
 // Aktuelles Training des Spielers abrufen
 export const getTraining = async (req, res) => {
   const userId = req.user.userId;

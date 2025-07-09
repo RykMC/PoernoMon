@@ -100,7 +100,7 @@ export default function Dashboard() {
       });
     } catch (err) {
       console.error("Fehler beim Matchmaking:", err);
-      alert("Kein passender Gegner gefunden oder Fehler beim Starten");
+      addConsoleMessage("Kein passender Gegner gefunden oder Fehler beim Starten");
     } finally {
       setLoadingFight(false);
       setConfirmFight(false);

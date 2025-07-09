@@ -262,6 +262,7 @@ async function handleTraining(token) {
     const training = res.data.training[0];
 
     if (training) {
+      console.log("Training:", training.aktiv, training.eigenschaft);
       if (training.aktiv === 0) {
         // wieder aufnehmen
         await api.post("/training/start", { eigenschaft: training.eigenschaft }, {
@@ -275,7 +276,7 @@ async function handleTraining(token) {
       // neues Training starten
       const eigenschaften = ["angriff", "verteidigen", "gesundheit"];
       const eigenschaft = eigenschaften[Math.floor(Math.random() * eigenschaften.length)];
-      await api.post("/training/start", { eigenschaft }, {
+      await api.post("/training/start", { eigenschaft } , {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log(`🏋️ Neues Training gestartet in ${eigenschaft}.`);
@@ -310,7 +311,7 @@ async function runBot() {
   await craftBot(token, spieler.kampfstaub);
   await maybeChangeDesign(token);
   await cleanUpBotMessages(token);
-//  await handleTraining(token);
+ // await handleTraining(token);
 runBot();
 }
 
