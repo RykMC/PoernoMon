@@ -59,6 +59,7 @@ export const getPoernomon = async (req, res) => {
       name: spieler.username,
       level: spieler.level,
       xp: spieler.xp,
+      champion: spieler.champion,
       xpAktuellesLevel,
       xpNaechstesLevel,
       kreatur_bild: spieler.kreatur_bild,

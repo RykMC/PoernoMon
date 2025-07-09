@@ -318,7 +318,27 @@ const kampfInsert = await pool.query(
     const list = texte[category];
     return list[Math.floor(Math.random() * list.length)].replace("{name}", name);
   }
-await protokolliere("anfang", 0, `Im heutigen Match stehen sich ${s1.username} und ${s2.username} gegenüber`, s1.user_id, s2.user_id);
+
+  if (s1.champion === 1) {
+    await protokolliere(
+      "anfang",
+      0,
+      `🏆 ${s1.username} ist der aktuelle Champion und versucht, seinen Titel gegen ${s2.username} zu verteidigen!`,
+      s1.user_id,
+      s2.user_id
+    );
+  } else if (s2.champion === 1) {
+    await protokolliere(
+      "anfang",
+      0,
+      `🏆 ${s2.username} ist der aktuelle Champion und versucht, seinen Titel gegen ${s1.username} zu verteidigen!`,
+      s2.user_id,
+      s1.user_id
+    );
+  }
+
+
+  await protokolliere("anfang", 0, `Im heutigen Match stehen sich ${s1.username} und ${s2.username} gegenüber`, s1.user_id, s2.user_id);
     const angriff = async (angreifer, verteidiger) => {
 
     const zufall200 = (gluck) => (Math.floor(Math.random() * 200) + 1) - gluck;
@@ -445,9 +465,21 @@ await protokolliere("anfang", 0, `Im heutigen Match stehen sich ${s1.username} u
   const gewinner = s1.leben > 0 ? s1 : s2;
 
   // Bonus-Faktoren
-  const bonusXP = 1 + gewinner.mehr_xp / 100;
-  const bonusStaub = 1 + gewinner.mehr_kampfstaub / 100;
-  const bonusCoins = 1 + gewinner.mehr_coins / 100;
+  let bonusXP = 1 + gewinner.mehr_xp / 100;
+  let bonusStaub = 1 + gewinner.mehr_kampfstaub / 100;
+  let bonusCoins = 1 + gewinner.mehr_coins / 100;
+
+  // Champion kassiert, doppelt
+  if (gewinner.champion === 1) {
+
+
+  console.log(`${gewinner.username} ist Champion und erhält doppelte Belohnungen!`);
+  await pool.query(`UPDATE champion SET gewonnen = gewonnen + 1 WHERE id = ( SELECT id FROM champion WHERE user_id = $1 ORDER BY datum DESC LIMIT 1)`, [gewinner.user_id]);
+  await protokolliere("info", 0, `🏅 ${gewinner.username} ist Champion und erhält doppelte Belohnungen!`, gewinner.user_id, verlierer.user_id);
+  bonusXP *= 2;
+  bonusStaub *= 2;
+  bonusCoins *= 2;
+}
 
   // Werte berechnen
   const xpG = Math.floor((100 + Math.random() * 50) * bonusXP);
@@ -638,6 +670,34 @@ if (xpNaechstesLevelG && aktuellerXP_G >= xpNaechstesLevelG) {
       text,
       Math.floor(Date.now() / 1000)
     ]);
+
+    if (verlierer.champion === 1) {
+      console.log(`${gewinner.username} übernimmt den Champion-Titel von ${verlierer.username}`);
+      await pool.query(`
+        UPDATE spieler SET champion = CASE 
+          WHEN user_id = $1 THEN 1
+          WHEN user_id = $2 THEN 0
+          ELSE champion 
+        END
+        WHERE user_id IN ($1, $2)
+      `, [gewinner.user_id, verlierer.user_id]);
+      await pool.query(`
+        INSERT INTO champion (user_id, datum, gewonnen) 
+        VALUES ($1, $2, 0)
+      `, [gewinner.user_id, Math.floor(Date.now() / 1000)]);
+      await protokolliere(
+        "info",
+        0,
+        `👑 ${gewinner.username} hat ${verlierer.username} besiegt und übernimmt den Champion-Titel!`,
+        gewinner.user_id,
+        verlierer.user_id
+      );
+      
+    }
+
+
+
+
 
  
     // Erfolgschecks

@@ -96,7 +96,6 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
   };
 
 
-  console.log(poernomon);
   return (
     <div className="w-full max-w-8xl mx-auto px-4 mt-6">
       <div className=" text-white rounded-2xl shadow-lg p-8 relative">
@@ -132,8 +131,14 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
                     );
                     setShowModal(true);
                   }}
-
                 >
+                  {poernomon.champion === 1 && (
+                    <img
+                      src="/images/global/champion.png"
+                      alt="Champion Badge"
+                      className="absolute top-[15px] left-[-20px] transform rotate-330 z-10 bg-black border-amber-300 border-3"
+                    />
+                  )}
                   {poernomon.background_bild && (
                     <img
                       src={`/${poernomon.background_bild}`}

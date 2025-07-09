@@ -72,6 +72,7 @@ export const getKampfverlauf = async (req, res) => {
         s1.max_leben AS spieler1_max,
         s1.frame_id AS spieler1_frame_id,
         s1.background_id AS spieler1_background_id,
+        s1.champion AS spieler1_champion,
         s1.user_id AS spieler1_user_id,
         df1.bild AS spieler1_frame_bild,
         db1.bild AS spieler1_background_bild,
@@ -82,6 +83,7 @@ export const getKampfverlauf = async (req, res) => {
         s2.max_leben AS spieler2_max,
         s2.frame_id AS spieler2_frame_id,
         s2.background_id AS spieler2_background_id,
+        s2.champion AS spieler2_champion,
         s2.user_id AS spieler2_user_id,
         df2.bild AS spieler2_frame_bild,
         db2.bild AS spieler2_background_bild,
@@ -126,6 +128,7 @@ export const getKampfverlauf = async (req, res) => {
         frame: kampfMeta.rows[0].spieler1_frame_bild,
         background: kampfMeta.rows[0].spieler1_background_bild,
         user_id: kampfMeta.rows[0].spieler1_user_id,
+        champion: kampfMeta.rows[0].spieler1_champion,
         items: [
           { typ: "waffe", bild: kampfMeta.rows[0].spieler1_waffe_bild, seltenheit: kampfMeta.rows[0].spieler1_waffe_seltenheit },
           { typ: "kopfschutz", bild: kampfMeta.rows[0].spieler1_kopfschutz_bild, seltenheit: kampfMeta.rows[0].spieler1_kopfschutz_seltenheit },
@@ -141,6 +144,7 @@ export const getKampfverlauf = async (req, res) => {
         frame: kampfMeta.rows[0].spieler2_frame_bild,
         background: kampfMeta.rows[0].spieler2_background_bild,
         user_id: kampfMeta.rows[0].spieler2_user_id,
+        champion: kampfMeta.rows[0].spieler2_champion,
         items: [
           { typ: "waffe", bild: kampfMeta.rows[0].spieler2_waffe_bild, seltenheit: kampfMeta.rows[0].spieler2_waffe_seltenheit },
           { typ: "kopfschutz", bild: kampfMeta.rows[0].spieler2_kopfschutz_bild, seltenheit: kampfMeta.rows[0].spieler2_kopfschutz_seltenheit },

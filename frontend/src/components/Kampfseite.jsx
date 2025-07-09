@@ -23,6 +23,7 @@ export default function Kampfseite() {
   const [bloodAnimation, setBloodAnimation] = useState(null);
   const [showBlood1, setShowBlood1] = useState(false);
   const [showBlood2, setShowBlood2] = useState(false);
+  const [championKampf, setChampionKampf] = useState(false);
 
   const [gewinnerId, setGewinnerId] = useState(location.state?.gewinnerId || null);
 
@@ -41,8 +42,12 @@ export default function Kampfseite() {
   };
 
   useEffect(() => {
+    
     // nur starten wenn Spieler geladen
     if (spieler1 && spieler2) {
+      if (spieler1.champion === 1 || spieler2.champion === 1) {
+      setTimeout(() => setChampionKampf(true), 3000); // taucht später auf
+    }
       setTimeout(() => setIntroStage("playerIn"), 1000);
       setTimeout(() => setIntroStage("vs"), 2000);
       setTimeout(() => setIntroStage("enemyIn"), 2500);
@@ -181,6 +186,8 @@ useEffect(() => {
     >
       
       <h1 className="text-3xl font-bold mb-6">⚔️ Kampf</h1>   
+
+
       {introStage !== "fight" && (
         <div className="absolute inset-0 bg-black z-50 flex items-center justify-center overflow-hidden">
           {/* Spieler1 */}
@@ -211,6 +218,17 @@ useEffect(() => {
           {/* VS */}
          {(introStage === "vs" || introStage === "moveToFight"  || introStage === "enemyIn") && (
             <img src="/images/global/vs.png" className="w-32 h-32 object-contain animate-bounce z-50"/>
+          )}
+
+          {/* ChampionKampf */}
+          {championKampf && (
+            <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-50">
+              <img
+                src="/images/global/ck.png"
+                alt="Championkampf"
+                className="w-80 h-auto animate-pulse"
+              />
+            </div>
           )}
 
           {/* Arena */}
