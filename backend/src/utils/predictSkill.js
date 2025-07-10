@@ -35,3 +35,4 @@ export function decideNextSkill(skillung) {
   console.log("✅ KI hat gewählt:", bestProp);
   return { nextSkill: bestProp, expectedWin: bestScore };
 }
+
