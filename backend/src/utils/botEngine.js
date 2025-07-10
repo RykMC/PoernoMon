@@ -78,13 +78,30 @@ async function equipItem(token, itemId, typ) {
       { slot: typ, itemId },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log(`🛡️ Item ${itemId} (${typ}) angelegt`);
+    console.log(`✅ Item ${itemId} (${typ}) angelegt`);
   } catch (err) {
     console.error(`❌ Fehler beim Anlegen von Item ${itemId}:`, err.response?.data || err);
   }
 }
 
-async function moveToShop(token, itemId) {
+
+async function moveToShop(token, item) {
+  const preis = sumItemStats(item) * 100;
+
+  try {
+    await api.post(`/items/${item.id}/sell`,
+      { preis },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    console.log(`✅ Item ${item.id} für ${preis} Coins in den Shop gestellt.`);
+  } catch (err) {
+    console.error(`❌ Fehler beim Verkauf von Item ${item.id}:`, err.response?.data || err.message);
+  }
+}
+
+async function moveToDestroy(token, itemId) {
   try {
    const res = await api.post(`/items/${itemId}/destroy`,
       { preis: 300 },
@@ -112,26 +129,29 @@ async function handleItemDecision(token, newItem) {
   const items = await api.get("/items/",
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log(`✅ Läuft bisher`);
     const itemsd = items.data;
     const existing = itemsd.find(item => item.typ === newItem.typ && item.angelegt === 1);
 
     const newSum = sumItemStats(newItem);
     const oldSum = existing ? sumItemStats(existing) : 0;
-
+    console.log(`neues Item Summe: ${newSum}`);
+    console.log(`altes Item Summe: ${oldSum}`);
     if (!existing) {
         await equipItem(token, newItem.id, newItem.typ);
+        console.log(`anziehen`);
     } else if (newSum > oldSum) {
-        await moveToShop(token, existing.id);
+        await moveToShop(token, existing);
+        console.log(`anziehen und altes verkaufen`);
         await equipItem(token, newItem.id, newItem.typ);
     } else {
-        await moveToShop(token, newItem.id);
+      console.log(`anziehen und altes entcraftet`);
+        await moveToDestroy(token, newItem.id);
     }
 }
 
 async function maybeChangeDesign(token) {
   if (Math.random() < 0.1) {
-    console.log("🎨 Bot möchte Design ändern...");
+    console.log("Bot möchte Design ändern...");
 
     try {
       const res = await api.get("/design/my-designs", {
@@ -147,7 +167,7 @@ async function maybeChangeDesign(token) {
           { type: "background", designId: randomBg },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log(`🌌 Hintergrund gewechselt zu ID ${randomBg}`);
+        console.log(`Hintergrund gewechselt zu ID ${randomBg}`);
       }
 
       if (frames.length > 0) {
@@ -156,7 +176,7 @@ async function maybeChangeDesign(token) {
           { type: "frame", designId: randomFrame },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log(`🖼️ Frame gewechselt zu ID ${randomFrame}`);
+        console.log(`Frame gewechselt zu ID ${randomFrame}`);
       }
 
     } catch (err) {
@@ -176,11 +196,11 @@ async function cleanUpBotMessages(token) {
       await api.delete(`/nachrichten/${n.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(`🗑️ Nachricht ${n.id} gelöscht`);
+      console.log(` Nachricht ${n.id} gelöscht`);
     }
 
     if (nachrichten.length > 0) {
-      console.log(`✉️ Bot hatte ${nachrichten.length} Nachrichten, alle gelöscht.`);
+      console.log(`Bot hatte ${nachrichten.length} Nachrichten, alle gelöscht.`);
     }
 
   } catch (err) {
@@ -204,7 +224,7 @@ async function handleTraining(token) {
         });
         console.log(`▶️ Training in ${training.eigenschaft} wieder aufgenommen.`);
       } else {
-        console.log(`🚀 Training läuft bereits in ${training.eigenschaft}.`);
+        console.log(`Training läuft bereits in ${training.eigenschaft}.`);
       }
     } else {
       // neues Training starten
@@ -213,7 +233,7 @@ async function handleTraining(token) {
       await api.post("/training/start", { eigenschaft } , {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(`🏋️ Neues Training gestartet in ${eigenschaft}.`);
+      console.log(`Neues Training gestartet in ${eigenschaft}.`);
     }
 
   } catch (err) {
@@ -240,7 +260,7 @@ async function createNewBot() {
     });
    
 
-    console.log(`🐣 Neuer Bot ${email} heißt jetzt ${nameRes}`);
+    console.log(`Neuer Bot ${email} heißt jetzt ${nameRes}`);
   } catch (err) {
     console.error(`❌ Fehler beim Erstellen/Setzen des Bots ${email}:`, err.response?.data || err);
   }
@@ -248,7 +268,7 @@ async function createNewBot() {
 
 async function fightBot(token, leben) {
   if (leben < 30) {
-    console.log("😴 Nicht genug Leben zum Kämpfen.");
+    console.log("Nicht genug Leben zum Kämpfen.");
     return;
   }
 
@@ -260,7 +280,7 @@ async function fightBot(token, leben) {
     });
     console.log(`⚔️ Kampf gestartet & gespeichert:`, res.data);
     if (res.data.level3_erreicht) {
-        console.log(`🚀 Einer hat Level 3 erreicht. Neuer Bot wird erstellt...`);
+        console.log(`Einer hat Level 3 erreicht. Neuer Bot wird erstellt...`);
         await createNewBot();
         }
   } catch (err) {
@@ -270,7 +290,7 @@ async function fightBot(token, leben) {
 
 async function craftBot(token, kampfstaub) {
   if (kampfstaub < 500) {
-    console.log("😴 Nicht genug Kampfstaub zum Craften.");
+    console.log("Nicht genug Kampfstaub zum Craften.");
     return;
   }
 
@@ -279,7 +299,7 @@ async function craftBot(token, kampfstaub) {
       headers: { Authorization: `Bearer ${token}` }
     });
     const newItem = res.data.item;
-    console.log(`🎉 Item gecraftet: ${newItem.typ} (ID ${newItem.id})`);
+    console.log(`Item gecraftet: ${newItem.typ} (ID ${newItem.id})`);
     await handleItemDecision(token, newItem);
   } catch (err) {
     console.error("❌ Craft-API Fehler:", err.response?.data || err);
@@ -298,11 +318,11 @@ async function runBot() {
     return;
   }
 
-  console.log(`🎯 Spieler hat ${spieler.skillpunkte} Skillpunkte`);
+  console.log(`Spieler hat ${spieler.skillpunkte} Skillpunkte`);
 
   if (spieler.skillpunkte > 0) {
     await skillLoop(token, spieler.skillpunkte);
-    console.log(`🚀 Alle Skillpunkte verteilt für ${email}`);
+    console.log(`Alle Skillpunkte verteilt für ${email}`);
   }
 
   await fightBot(token, spieler.leben);
