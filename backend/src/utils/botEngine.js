@@ -1,8 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
-import { retrainBotModel } from "../utils/trainBotModel.js";
-import { decideNextSkill } from "../utils/predictSkill.js";
 
 const api = axios.create({
   baseURL: process.env.API_URL || "http://localhost:5000/api",
@@ -115,21 +113,15 @@ async function moveToDestroy(token, itemId) {
   }
 }
 
-async function skillLoop(token, skillpunkte, skillung) {
+async function skillLoop(token, skillpunkte) {
   while (skillpunkte > 0) {
-    const { nextSkill } = decideNextSkill(skillung);
-    try {
-      await api.post("/poernomon/skill",
-        { eigenschaft: nextSkill },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      skillung[nextSkill]++;
-      skillpunkte--;
-    } catch (err) {
-      console.error("❌ Fehler beim Skillen:", err.response?.data || err.message || err);
-      skillpunkte = 0; // sonst läuft er weiter
-    }
-
+    const randomAttr = getRandomAttribute();
+    await api.post("/poernomon/skill",
+      { eigenschaft: randomAttr },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log(`✅ Geskillt: ${randomAttr}`);
+    skillpunkte--;
   }
 }
 
@@ -294,8 +286,6 @@ async function fightBot(token, leben) {
   } catch (err) {
     console.error("❌ Kampf-API Fehler:", err.response?.data || err);
   }
-  await retrainBotModel();
-
 }
 
 async function craftBot(token, kampfstaub) {
@@ -331,20 +321,7 @@ async function runBot() {
   console.log(`Spieler hat ${spieler.skillpunkte} Skillpunkte`);
 
   if (spieler.skillpunkte > 0) {
-    await skillLoop(token, spieler.skillpunkte, {
-      angriff: spieler.angriff,
-      krit_chance: spieler.krit_chance,
-      krit_schaden: spieler.krit_schaden,
-      doppelschlag: spieler.doppelschlag,
-      ausweichen: spieler.ausweichen,
-      verteidigen: spieler.verteidigen,
-      leben_pro_treffer: spieler.leben_pro_treffer,
-      max_leben: spieler.max_leben,
-      gluck: spieler.gluck,
-      mehr_kampfstaub: spieler.mehr_kampfstaub,
-      mehr_xp: spieler.mehr_xp,
-      mehr_coins: spieler.mehr_coins
-    });
+    await skillLoop(token, spieler.skillpunkte);
     console.log(`Alle Skillpunkte verteilt für ${email}`);
   }
 
