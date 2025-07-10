@@ -21,6 +21,7 @@ const attributes = [
   "mehr_coins"
 ];
 
+
 function getRandomAttribute() {
   return attributes[Math.floor(Math.random() * attributes.length)];
 }
