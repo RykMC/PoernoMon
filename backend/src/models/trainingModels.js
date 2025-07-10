@@ -6,7 +6,6 @@ export const startTrainingSchema = z.object({
 
 export function validateStartTraining(req, res) {
   const parsed = startTrainingSchema.safeParse(req.body);
-  console.log("Parsed:", parsed);
   if (!parsed.success) {
     console.log("VALIDATE ERROR FLATTEN:", parsed.error.flatten());
     return res.status(400).json({ 
