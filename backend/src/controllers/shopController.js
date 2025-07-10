@@ -95,7 +95,7 @@ export const buyShopItem = async (req, res) => {
 
       return res.json({ success: true, message: "Heiltrank erfolgreich gekauft" });
     }
-    if (shopItem.item_id === 842) {
+    if (shopItem.item_id === 1) {
       await pool.query(`UPDATE spieler SET coins = coins - $1, skillpunkte = skillpunkte +1 WHERE user_id = $2`, [shopItem.preis, buyerId]);
 
       return res.json({ success: true, message: "Skillpunkt gekauft" });

@@ -136,7 +136,7 @@ export default function PoernoMonModal({ setModalContent, setShowModal, addConso
                     <img
                       src="/images/global/champion.png"
                       alt="Champion Badge"
-                      className="absolute top-[15px] left-[-20px] transform rotate-330 z-10 bg-black border-amber-300 border-3"
+                      className="absolute top-[5px] left-[-40px] transform rotate-330 z-10"
                     />
                   )}
                   {poernomon.background_bild && (
