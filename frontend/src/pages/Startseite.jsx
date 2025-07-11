@@ -13,30 +13,34 @@ export default function Startseite() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false);
+      setFade(false); // 1. fade-out starten
+
       setTimeout(async () => {
-      try {
-        const res = await api.get("/auth/random");
-        const newMon = { 
-          name: res.data.username, 
-          bild: "/" + res.data.kreatur_bild 
-        };
-        
-        const img = new Image();
-        img.src = newMon.bild;
-        img.onload = () => {
-        setCurrentMon(newMon);
-        const angle = Math.random() < 0.5 
-          ? Math.floor(Math.random() * 10) 
-          : 350 + Math.floor(Math.random() * 10);
-        setRotation(angle);
-        setFade(true);
-      };
-      } catch (err) {
-        console.error("Fehler beim Laden des PoernoMons:", err);
-      }
-    }, 2000);
+        try {
+          const res = await api.get("/auth/random");
+          const newMon = { 
+            name: res.data.username, 
+            bild: "/" + res.data.kreatur_bild 
+          };
+
+          // Bild vorladen
+          const img = new Image();
+          img.src = newMon.bild;
+          img.onload = () => {
+            setCurrentMon(newMon);
+            const angle = Math.random() < 0.5 
+              ? Math.floor(Math.random() * 10) 
+              : 350 + Math.floor(Math.random() * 10);
+            setRotation(angle);
+
+            setFade(true); // 4. fade-in starten
+          };
+        } catch (err) {
+          console.error("Fehler beim Laden des PoernoMons:", err);
+        }
+      }, 1000); // 2. eine Sekunde warten, bis fade-out fertig
     }, 10000);
+
     return () => clearInterval(interval);
   }, []);
 
