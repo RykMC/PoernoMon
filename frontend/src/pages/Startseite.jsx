@@ -9,36 +9,54 @@ export default function Startseite() {
   const [fade, setFade] = useState(true);
   const [message, setMessage] = useState("");
   const [rotation, setRotation] = useState(0);
+  const [nextMon, setNextMon] = useState(null);
 
+useEffect(() => {
+  const interval = setInterval(() => {
+    let newMonData;
+    let angle = Math.random() < 0.5 
+      ? Math.floor(Math.random() * 10) 
+      : 350 + Math.floor(Math.random() * 10);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFade(false);
-      setTimeout(async () => {
+    setFade(false); // fade-out starten
+
+    // lade schon mal das nächste Bild + Infos
+    const loadNextMon = async () => {
       try {
         const res = await api.get("/auth/random");
-        const newMon = { 
-          name: res.data.username, 
-          bild: "/" + res.data.kreatur_bild 
+        newMonData = {
+          name: res.data.username,
+          bild: "/" + res.data.kreatur_bild
         };
-        
-        const img = new Image();
-        img.src = newMon.bild;
-        img.onload = () => {
-        setCurrentMon(newMon);
-        const angle = Math.random() < 0.5 
-          ? Math.floor(Math.random() * 10) 
-          : 350 + Math.floor(Math.random() * 10);
-        setRotation(angle);
-        setFade(true);
-      };
+
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.src = newMonData.bild;
+          img.onload = resolve;
+        });
+
+        setNextMon(newMonData); // im staging halten
       } catch (err) {
-        console.error("Fehler beim Laden des PoernoMons:", err);
+        console.error("Fehler beim Laden:", err);
       }
-    }, 1000);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    };
+
+    loadNextMon();
+
+    setTimeout(() => {
+      if (newMonData) {
+        setCurrentMon(newMonData); // jetzt erst Bild wechseln
+        setRotation(angle);
+      } else if (nextMon) {
+        setCurrentMon(nextMon); // fallback
+      }
+      setFade(true); // fade-in starten
+    }, 1000); // nach fade-out Dauer
+
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const handleAuth = async (e) => {
     e.preventDefault();
